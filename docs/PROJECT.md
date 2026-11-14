@@ -28,19 +28,37 @@ Estas responsabilidades orientan la implementación; no requieren crear módulos
 
 ## Contratos de configuración
 
-Los archivos JSON se resuelven desde la raíz externa configurada. Sus esquemas exactos, nombres de campos y reglas de compatibilidad se definirán al implementar el primer incremento, respetando estos contratos:
+Los archivos JSON se resolverán desde la raíz externa configurada. Los contratos estructurales están implementados con Zod en `src/configuration`, con tipos TypeScript derivados de los esquemas. Todos los objetos son estrictos: rechazan propiedades desconocidas. Los tres archivos requieren `version: 1` numérico; otras versiones se rechazan.
 
 ### `site.json`
 
-Incluye versión, nombre, descripción, idioma (`es` o `en`), mensaje de bienvenida configurable y colores básicos.
+- `name` y `description`: cadenas obligatorias con texto no vacío.
+- `locale`: `es` o `en`; predeterminado `es`.
+- `terminal.welcome`: cadena opcional. Si se omite, se genera «Bienvenido. Escribe help para explorar el sitio.» o «Welcome. Type help to explore the site.» según el idioma.
+- `theme.accentColor`: hexadecimal de seis dígitos con `#`; predeterminado `#96D9A5`.
+- `theme.terminalBackground`: mismo formato; predeterminado `#292C32`.
+
+`terminal` y `theme` son opcionales y sus valores se completan por propiedad, incluso cuando se proporciona un objeto vacío o parcial. Una bienvenida explícita vacía se conserva. Los tipos `SiteConfigInput` y `SiteConfig` distinguen la entrada de la configuración con valores predeterminados aplicados.
 
 ### `commands.json`
 
-Define comandos personalizados de tipo `document` o `collection`, con nombres, descripciones, alias y referencias a los elementos correspondientes del catálogo.
+Requiere el arreglo `commands`, que puede estar vacío. Cada comando tiene `type`, `name`, `description` y `aliases` opcional como arreglo. Los nombres y alias son cadenas no vacías compuestas de letras ASCII minúsculas, números y guiones; `help`, `clear` y `history` están reservados tanto en nombres como en alias.
+
+- `type: "document"`: requiere `content` y prohíbe `collection`.
+- `type: "collection"`: requiere `collection` y prohíbe `content`.
+
+`description` debe contener texto no vacío. Las referencias usan el formato de ID del catálogo. Todavía no se validan colisiones entre comandos ni la existencia de sus referencias.
 
 ### `content.json`
 
-Define el catálogo de documentos Markdown y las colecciones. Cada colección requiere un documento introductorio. Los documentos se identifican mediante un ID global dentro del catálogo.
+Requiere los arreglos `collections` y `documents`, que pueden estar vacíos.
+
+- Colección: `id`, `title`, `description` opcional, `intro` obligatorio y `documents` como arreglo ordenado de IDs sin repeticiones.
+- Documento: `id`, `title`, `description` opcional, `path` y `format: "markdown"`.
+
+Los títulos y las rutas requieren texto no vacío. Los IDs usan segmentos alfanuméricos ASCII en minúsculas separados por un solo guion (`intro`, `essay-2`, `2026-notes`); no admiten guiones iniciales, finales ni consecutivos. Son únicos dentro de su tipo; una colección y un documento pueden compartir ID. Las cadenas con texto obligatorio rechazan espacios en blanco como único contenido, pero no se recortan ni normalizan.
+
+La validación estructural no comprueba todavía la existencia de los IDs referenciados por `intro`, `documents` o los comandos, ni realiza solicitudes HTTP. La validación cruzada queda para la siguiente tarea. No se imponen aún reglas de URL o extensión a `path`.
 
 ## Comportamiento del MVP
 
@@ -51,7 +69,7 @@ Define el catálogo de documentos Markdown y las colecciones. Cada colección re
 - La inicialización es estricta: cualquier fallo de carga o validación de un JSON, o cualquier referencia inválida, impide alcanzar el estado `ready`.
 - Los documentos Markdown se descargan bajo demanda y se cachean durante la sesión. Su descarga no forma parte de la validación inicial de los JSON y sus referencias.
 
-La sintaxis concreta para las operaciones de colección, las reglas de nombres y alias y las políticas de error de descarga de Markdown quedan pendientes de definición en sus incrementos correspondientes.
+La sintaxis concreta para las operaciones de colección, las reglas de colisiones entre nombres y alias y las políticas de error de descarga de Markdown quedan pendientes de definición en sus incrementos correspondientes.
 
 ## Identidad visual inicial
 
@@ -61,7 +79,7 @@ La sintaxis concreta para las operaciones de colección, las reglas de nombres y
 - Separadores entre ejecuciones.
 - Markdown renderizado dentro de la terminal.
 
-Los colores básicos serán configurables. Los valores exactos y su correspondencia con los elementos visuales se definirán al implementar el contrato de `site.json`.
+Los colores básicos son configurables mediante `theme`. Su aplicación a la interfaz queda para un incremento posterior.
 
 ## Primer incremento: alcance actual
 
