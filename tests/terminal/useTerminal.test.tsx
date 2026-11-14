@@ -18,6 +18,7 @@ function Harness({ executor = executorInstance }: { executor?: Pick<CommandExecu
   return <Terminal welcome="Bienvenida permanente" theme={{ accentColor: '#96D9A5', terminalBackground: '#292C32' }}
     labels={{ input: 'Comando', history: 'Historial visual', pending: 'Ejecutando…' }}
     entries={terminal.entries} promptValue={terminal.input} pending={terminal.pending}
+    onHistoryPrevious={() => terminal.navigateHistory('previous')} onHistoryNext={() => terminal.navigateHistory('next')}
     onInputChange={terminal.setInput} onSubmit={() => { void terminal.submit() }} />
 }
 const executorInstance = executor()
@@ -92,6 +93,51 @@ describe('useTerminal', () => {
     expect(screen.getByText('Listo')).toBeTruthy()
     expect(input.readOnly).toBe(false)
     expect(within(screen.getByRole('list', { name: 'Historial visual' })).getAllByRole('listitem')).toHaveLength(1)
+  })
+
+  it('navega con flechas, conserva alias y espacios y recupera el borrador', async () => {
+    const execute = vi.fn<CommandExecutor['execute']>().mockResolvedValue([])
+    const { result } = renderHook(() => useTerminal({ execute }, 'es'))
+    for (const input of ['  acerca  ', 'code list']) {
+      act(() => result.current.setInput(input))
+      await act(async () => { await result.current.submit() })
+    }
+    const original = [...result.current.commandHistory]
+    act(() => result.current.setInput('borrador sin enviar'))
+    act(() => result.current.navigateHistory('previous'))
+    expect(result.current.input).toBe('code list')
+    act(() => { result.current.navigateHistory('previous'); result.current.navigateHistory('previous') })
+    expect(result.current.input).toBe('  acerca  ')
+    act(() => result.current.setInput('edición de la copia'))
+    act(() => result.current.navigateHistory('next'))
+    expect(result.current.input).toBe('code list')
+    act(() => { result.current.navigateHistory('next'); result.current.navigateHistory('next') })
+    expect(result.current.input).toBe('borrador sin enviar')
+    expect(result.current.commandHistory).toEqual(original)
+    expect(execute).toHaveBeenCalledTimes(2)
+  })
+
+  it('las flechas sin historial no alteran el borrador ni ejecutan comandos', () => {
+    render(<Harness />)
+    const input = screen.getByRole('textbox', { name: 'Comando' }) as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'borrador' } })
+    fireEvent.keyDown(input, { key: 'ArrowUp' })
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(input.value).toBe('borrador')
+    expect(screen.queryByRole('list')).toBeNull()
+  })
+
+  it('conecta la navegación de teclado después de ejecutar sin mutar el historial', async () => {
+    render(<Harness />)
+    const input = screen.getByRole('textbox', { name: 'Comando' }) as HTMLInputElement
+    fireEvent.change(input, { target: { value: '  help  ' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    await waitFor(() => expect(input.readOnly).toBe(false))
+    fireEvent.change(input, { target: { value: 'mi borrador' } })
+    fireEvent.keyDown(input, { key: 'ArrowUp' })
+    expect(input.value).toBe('  help  ')
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(input.value).toBe('mi borrador')
   })
 
   it('ejecuta al pulsar Enter, muestra errores y clear conserva bienvenida e historial original', async () => {

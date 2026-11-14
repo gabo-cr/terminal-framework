@@ -4,7 +4,10 @@ import type { CommandLocale, CommandResult } from '../core/commandResults'
 import type { TerminalEntryData } from './types'
 
 export function useTerminal(executor: Pick<CommandExecutor, 'execute'>, locale: CommandLocale) {
-  const [input, setInput] = useState('')
+  const [input, updateInput] = useState('')
+  const inputValue = useRef('')
+  const historyPosition = useRef<number | null>(null)
+  const draft = useRef('')
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [entries, setEntries] = useState<TerminalEntryData[]>([])
   const [pending, setPending] = useState(false)
@@ -16,14 +19,40 @@ export function useTerminal(executor: Pick<CommandExecutor, 'execute'>, locale: 
     return () => { mounted.current = false }
   }, [])
 
+  function setInput(value: string) {
+    inputValue.current = value
+    updateInput(value)
+  }
+
+  function navigateHistory(direction: 'previous' | 'next') {
+    if (locked.current || commandHistory.length === 0) return
+    const position = historyPosition.current
+    if (direction === 'previous') {
+      if (position === null) draft.current = inputValue.current
+      const next = position === null ? commandHistory.length - 1 : Math.max(0, position - 1)
+      historyPosition.current = next
+      setInput(commandHistory[next]!)
+    } else if (position !== null) {
+      if (position + 1 < commandHistory.length) {
+        historyPosition.current = position + 1
+        setInput(commandHistory[position + 1]!)
+      } else {
+        historyPosition.current = null
+        setInput(draft.current)
+      }
+    }
+  }
+
   async function submit() {
     // Solo descarta espacio vacío; el parser del ejecutor conserva toda la sintaxis.
-    if (locked.current || !input.trim()) return
+    if (locked.current || !inputValue.current.trim()) return
     locked.current = true
-    const command = input
+    const command = inputValue.current
     const id = String(++nextId.current)
     const history = [...commandHistory]
     setInput('')
+    historyPosition.current = null
+    draft.current = ''
     setPending(true)
     setCommandHistory([...history, command])
     setEntries((current) => [...current, { id, command, status: 'pending', results: [] }])
@@ -48,5 +77,5 @@ export function useTerminal(executor: Pick<CommandExecutor, 'execute'>, locale: 
       if (mounted.current) setPending(false)
     }
   }
-  return { input, setInput, submit, commandHistory, entries, pending }
+  return { input, setInput, submit, commandHistory, entries, pending, navigateHistory }
 }

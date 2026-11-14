@@ -43,6 +43,8 @@ function SitePage({ application }: { application: Application }) {
         onInputChange={terminal.setInput}
         onSubmit={() => { void terminal.submit() }}
         pending={terminal.pending}
+        onHistoryPrevious={() => terminal.navigateHistory('previous')}
+        onHistoryNext={() => terminal.navigateHistory('next')}
       />
     </div>
   )

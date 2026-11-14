@@ -310,6 +310,45 @@ en el controlador y no produce contenido visible.
 Los colores, bienvenida, metadatos y estados de inicialización siguen configurados
 por el sitio. No hay muestras de contenido personal en producción.
 
+### Navegación, foco y desplazamiento
+
+El componente de entrada existente es `TerminalPrompt`. Flecha arriba y abajo
+llaman a `useTerminal.navigateHistory` para recorrer instrucciones aceptadas sin
+mutarlas ni ejecutarlas. Se conserva el texto original, incluidos alias y espacios.
+Al iniciar la navegación se guarda el borrador; al volver al final se restaura.
+Editar una instrucción recuperada modifica solo la copia de entrada y no reemplaza
+el borrador guardado. Enviar una instrucción reinicia el cursor de navegación.
+Sin historial las flechas son inocuas; durante una ejecución no se navega.
+
+La entrada sigue en el orden natural del teclado, conserva su etiqueta accesible
+y muestra un contorno de foco. No recibe autofocus al montar. Durante la espera
+permanece montada y de solo lectura. Al finalizar se conserva el foco mediante
+`focus({ preventScroll: true })` únicamente si seguía en la entrada; si el visitante
+se trasladó a un enlace u otro elemento no se recupera el foco automáticamente.
+La composición IME, los eventos Enter repetidos y el bloqueo síncrono existente
+previenen envíos accidentales; las flechas con modificadores no se interceptan.
+
+La bienvenida y el historial están dentro de un viewport de altura limitada,
+con desplazamiento propio, foco visible, etiqueta de región y navegación de
+teclado; el prompt queda fuera de esa zona desplazable. `useTerminalScroll`
+sigue las actualizaciones cuando el visitante estaba a 64 px o menos del final.
+Si lee contenido anterior, conserva su posición. Un documento largo se muestra
+desde el inicio de la ejecución reciente, no saltando al final de su texto.
+ResizeObserver contempla cambios de altura; clear vuelve al comienzo del panel.
+No se usa scrollIntoView ni desplazamiento global de la página.
+
+El desplazamiento usa movimiento suave salvo que `prefers-reduced-motion: reduce`
+esté activo (o no pueda consultarse), en cuyo caso es inmediato. El historial no
+es una región live: el indicador `role="status"` anuncia solo la espera, el input
+expone `aria-busy`, y los errores anuncian únicamente su mensaje mediante alert.
+Los documentos no se anuncian completos en cada actualización.
+
+Las pruebas en `tests/terminal/accessibility.test.tsx` verifican foco, no interferencia
+con enlaces, estados accesibles y decisiones de scroll con geometría simulada.
+Las pruebas de useTerminal cubren límites de historial, borrador y navegación real
+con teclado. La geometría y el movimiento se simulan en jsdom; una revisión visual
+en navegador y con lectores de pantalla sigue siendo una comprobación manual útil.
+
 ### Renderizado seguro de Markdown
 
 `MarkdownRenderer` recibe únicamente la cadena `markdown` y usa react-markdown.
