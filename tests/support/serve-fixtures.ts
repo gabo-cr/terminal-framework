@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const fixtureDirectory = fileURLToPath(new URL('../fixtures/external-site/', import.meta.url))
+export const fixtureDirectory = resolve(import.meta.dirname, '../fixtures/external-site')
 
 // Servidor estático de pruebas: sin fallback de SPA, con 404 reales y CORS público.
 export function createFixtureServer(directory = fixtureDirectory) {

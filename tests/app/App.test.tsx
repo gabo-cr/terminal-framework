@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { StrictMode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import siteJson from '../fixtures/ui-site/config/site.json?raw'
 import commandsJson from '../fixtures/ui-site/config/commands.json?raw'
 import contentJson from '../fixtures/ui-site/config/content.json?raw'
@@ -10,6 +10,13 @@ const exampleName: string = JSON.parse(siteJson).name
 const examples: Record<string, string> = { 'site.json': siteJson, 'commands.json': commandsJson, 'content.json': contentJson }
 import { App } from '../../src/app/App'
 import { bootstrapApplication } from '../../src/app/bootstrapApplication'
+
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  let reject!: (reason: unknown) => void
+  const promise = new Promise<T>((onResolve, onReject) => { resolve = onResolve; reject = onReject })
+  return { promise, resolve, reject }
+}
 
 function exampleFetch(invalid = false) {
   return vi.fn<typeof globalThis.fetch>(async (input) => {
@@ -82,10 +89,76 @@ describe('Interfaz de arranque', () => {
   })
 
   it('tolera StrictMode e ignora resultados de efectos que ya no están activos', async () => {
-    const load = vi.fn(exampleLoader())
+    const fetch = exampleFetch()
+    const load = vi.fn(exampleLoader(fetch))
     render(<StrictMode><App load={load} /></StrictMode>)
     await waitFor(() => expect(screen.getByRole('heading', { name: exampleName })).toBeTruthy())
     expect(screen.queryByRole('alert')).toBeNull()
+    expect(load).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledTimes(3)
+  })
+
+  it.each(['resolve', 'reject'] as const)('descarta un arranque obsoleto que termina con %s', async (outcome) => {
+    const previous = deferred<Awaited<ReturnType<typeof bootstrapApplication>>>()
+    const oldLoad = vi.fn(() => previous.promise)
+    const { rerender } = render(<App load={oldLoad} />)
+    await waitFor(() => expect(oldLoad).toHaveBeenCalledTimes(1))
+    rerender(<App load={exampleLoader()} />)
+    await screen.findByRole('textbox', { name: 'Comando' })
+    await act(async () => {
+      if (outcome === 'reject') previous.reject(new Error('Obsolete failure'))
+      else {
+        const old = await exampleLoader()()
+        old.configuration.site.name = 'Obsolete site'
+        previous.resolve(old)
+      }
+    })
+    expect(screen.getByRole('heading', { name: exampleName })).toBeTruthy()
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(screen.queryByText('Obsolete site')).toBeNull()
+  })
+
+  it('retira la sesión previa y descarta comandos pendientes al cambiar el cargador', async () => {
+    const oldApplication = await exampleLoader()()
+    const command = deferred<Awaited<ReturnType<typeof oldApplication.executor.execute>>>()
+    vi.spyOn(oldApplication.executor, 'execute').mockReturnValue(command.promise)
+    const oldLoad = vi.fn(async () => oldApplication)
+    const next = deferred<typeof oldApplication>()
+    const newLoad = vi.fn(() => next.promise)
+    const { rerender } = render(<App load={oldLoad} />)
+    const input = await screen.findByRole('textbox')
+    fireEvent.change(input, { target: { value: 'about' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    rerender(<App load={newLoad} />)
+    expect(screen.queryByRole('textbox')).toBeNull()
+    expect(screen.getByRole('status').textContent).toBe('Cargando…')
+    await act(async () => { next.resolve(await exampleLoader()()) })
+    await screen.findByRole('textbox')
+    await act(async () => { command.resolve([{ type: 'text', text: 'Obsolete command' }]) })
+    expect(screen.queryByText('Obsolete command')).toBeNull()
+    const newInput = screen.getByRole('textbox')
+    fireEvent.change(newInput, { target: { value: 'history' } })
+    fireEvent.keyDown(newInput, { key: 'Enter' })
+    expect(await screen.findByText('1. history')).toBeTruthy()
+    expect(screen.queryByText('1. about')).toBeNull()
+    expect(newLoad).toHaveBeenCalledTimes(1)
+  })
+
+  it('no restaura una sesión antigua al volver a un cargador anterior', async () => {
+    const application = await exampleLoader()()
+    const pending = deferred<typeof application>()
+    const load = vi.fn<() => Promise<typeof application>>()
+      .mockResolvedValueOnce(application).mockReturnValue(pending.promise)
+    const { rerender } = render(<App load={load} />)
+    await screen.findByRole('textbox')
+    rerender(<App load={() => new Promise(() => {})} />)
+    expect(screen.queryByRole('textbox')).toBeNull()
+    rerender(<App load={load} />)
+    expect(screen.queryByRole('textbox')).toBeNull()
+    expect(screen.getByRole('status').textContent).toBe('Cargando…')
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(2))
+    await act(async () => { pending.resolve(await exampleLoader()()) })
+    expect(await screen.findByRole('textbox')).toBeTruthy()
   })
 })
 

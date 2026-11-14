@@ -277,10 +277,22 @@ simulado en ambos idiomas y conservan todas las pruebas anteriores.
 
 ## Incremento 4: terminal e interacción básica
 
+La aplicación ya utiliza la terminal interactiva con configuración y contenidos
+remotos. Las restricciones de UI de los incrementos anteriores describen su alcance
+histórico. La integración y la comprobación en navegador están documentadas en
+[INCREMENT-4.md](INCREMENT-4.md).
+
 `src/terminal` contiene los componentes visuales y `useTerminal`. La página se
 inicializa mediante `loadApplication` y conserva el servicio y ejecutor creados
 por el bootstrap. `useConfiguration` admite el resultado tipado del arranque
 completo y conserva sus estados de carga, error y reintento.
+
+Cada intento comparte una única promesa de bootstrap entre las activaciones del
+efecto de StrictMode. No hay caché global de inicialización: un reintento, un cambio
+de cargador o un nuevo montaje inicia una sesión distinta. La sesión anterior se
+retira inmediatamente al cambiar el cargador, incluso al volver a uno usado antes.
+Las resoluciones y los rechazos obsoletos no actualizan el estado; los comandos
+pendientes de una terminal desmontada tampoco se muestran en la nueva sesión.
 
 El prompt es una entrada controlada. Enter acepta una instrucción no vacía,
 conserva su texto original y vacía el campo. No se envía Enter durante composición
