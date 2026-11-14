@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import { contentIdSchema, nonEmptyStringSchema } from './fields'
+import { isReservedCommandName } from '../core/commandNames'
 
-const reservedNames = new Set(['help', 'clear', 'history'])
 const commandNameSchema = z.string().regex(/^[a-z0-9-]+$/).refine(
-  (name) => !reservedNames.has(name),
+  (name) => !isReservedCommandName(name),
   'Nombre reservado para un comando integrado.',
 )
 

@@ -113,12 +113,16 @@ La tarea documental inicial únicamente crea la documentación de contexto: no c
 
 ## Incremento 2: alcance actual
 
-La primera tarea del motor implementa exclusivamente `parseCommand` en `src/core`, sin dependencias de React, configuración ni HTTP. No incluye CommandRegistry, CommandExecutor ni interfaz de entrada.
+El motor comienza con `parseCommand` y `CommandRegistry` en `src/core`, sin dependencias de React ni HTTP. El parser no depende de configuración; el registro reutiliza únicamente sus tipos. No incluye CommandExecutor ni interfaz de entrada.
 
 - Devuelve una unión discriminada por `status`: `valid` con `command` (`name` y `argument` opcional), `empty`, o `error` con código estable.
 - Recorta espacios exteriores, admite separadores de espacio en blanco (incluidas tabulaciones) y conserva mayúsculas, minúsculas y caracteres de los tokens. No comprueba la existencia del comando ni impone el formato de nombres de la configuración.
 - Rechaza más de un argumento con `TOO_MANY_ARGUMENTS`.
 - Rechaza flags (tokens que empiezan con `-`), comillas, backticks, barras invertidas, pipes, redirecciones, `;`, `&` y saltos de línea internos con `UNSUPPORTED_SYNTAX`. Esta comprobación tiene prioridad sobre la cantidad de argumentos. No interpreta sintaxis de shell. Los saltos de línea exteriores se eliminan con el resto del espacio exterior.
+
+`CommandRegistry` recibe el arreglo de comandos personalizados ya validados. Registra primero `help`, `clear` y `history`, en ese orden, y después los personalizados en el orden de entrada. `find(name)` resuelve nombres y alias exactamente, sin normalización, y devuelve `undefined` si no existen. Un alias devuelve la misma definición que el nombre original. `list()` devuelve una lista ordenada de definiciones únicas, sin entradas adicionales por alias. `kind` distingue `internal` y `custom`; los personalizados conservan sus tipos `document` o `collection` y referencias. Los internos se identifican por nombre; su descripción localizada para la ayuda corresponde a una tarea posterior.
+
+Las reglas de colisión y los nombres reservados se centralizan en `core/commandNames.ts` y se reutilizan desde el registro, la validación cruzada y el esquema de nombres reservados. El constructor rechaza conflictos con `CommandRegistryError` (`code: COMMAND_CONFLICT`) y ubicaciones del uso actual y original; no revalida esquemas ni referencias. No ofrece registro incremental ni ejecución. Conserva copias congeladas de las definiciones y sus alias para que cambios externos no desincronicen la búsqueda y el listado.
 
 ## Forma de trabajo
 

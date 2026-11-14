@@ -2,6 +2,7 @@ import type { Configuration } from './ConfigurationLoader'
 import { ConfigurationError } from './ConfigurationError'
 import type { ConfigurationIssue } from './ConfigurationError'
 import { normalizeContentBaseUrl, resolveSafeRelativeUrl } from './urls'
+import { findCommandNameConflicts } from '../core/commandNames'
 
 // Recibe datos que ya pasaron los esquemas. No muta ni descarga contenidos.
 export function validateConfiguration(
@@ -13,26 +14,14 @@ export function validateConfiguration(
   const issues: ConfigurationIssue[] = []
   const documents = new Set(configuration.content.documents.map(({ id }) => id))
   const collections = new Set(configuration.content.collections.map(({ id }) => id))
-  const names = new Map<string, (string | number)[]>()
+  for (const conflict of findCommandNameConflicts(configuration.commands.commands)) {
+    issues.push({
+      ...conflict, code: 'COMMAND_CONFLICT', file: 'commands.json',
+      message: `Nombre o alias repetido o reservado: ${conflict.value}`,
+    })
+  }
 
   configuration.commands.commands.forEach((command, index) => {
-    const tokens = [
-      { value: command.name, path: ['commands', index, 'name'] },
-      ...(command.aliases ?? []).map((value, aliasIndex) => ({
-        value, path: ['commands', index, 'aliases', aliasIndex],
-      })),
-    ]
-    for (const { value, path } of tokens) {
-      const conflictingPath = names.get(value)
-      if (conflictingPath) {
-        issues.push({
-          code: 'COMMAND_CONFLICT', file: 'commands.json', path, value, conflictingPath,
-          message: `Nombre o alias repetido: ${value}`,
-        })
-      } else {
-        names.set(value, path)
-      }
-    }
     const isDocument = command.type === 'document'
     const value = isDocument ? command.content : command.collection
     if (!(isDocument ? documents : collections).has(value)) {
