@@ -85,7 +85,7 @@ Todas las rutas de documento, incluidas las de documentos no referenciados, debe
 - La inicialización es estricta: cualquier fallo de carga o validación de un JSON, o cualquier referencia inválida, impide alcanzar el estado `ready`.
 - Los documentos Markdown se descargan bajo demanda y se cachean durante la sesión. Su descarga no forma parte de la validación inicial de los JSON y sus referencias.
 
-La sintaxis concreta para las operaciones de colección y las políticas de error de descarga de Markdown quedan pendientes de definición en sus incrementos correspondientes.
+Las operaciones de colección usan `comando`, `comando list` y `comando <documento>`. Las políticas de descarga HTTP de Markdown quedan para un incremento posterior.
 
 ## Identidad visual inicial
 
@@ -113,7 +113,7 @@ La tarea documental inicial únicamente crea la documentación de contexto: no c
 
 ## Incremento 2: alcance actual
 
-El motor comienza con `parseCommand`, `CommandRegistry` y los comportamientos internos `help`, `clear` e `history` en `src/core`, sin dependencias de React ni HTTP. El parser no depende de configuración; el registro reutiliza únicamente sus tipos. No incluye CommandExecutor ni interfaz de entrada.
+El motor comienza con `parseCommand`, `CommandRegistry` y los comportamientos internos `help`, `clear` e `history` en `src/core`, sin dependencias de React ni HTTP. El parser no depende de configuración; el registro reutiliza únicamente sus tipos. Incluye CommandExecutor con un servicio de contenidos inyectable, pero no interfaz de entrada ni descargas HTTP de Markdown.
 
 - Devuelve una unión discriminada por `status`: `valid` con `command` (`name` y `argument` opcional), `empty`, o `error` con código estable.
 - Recorta espacios exteriores, admite separadores de espacio en blanco (incluidas tabulaciones) y conserva mayúsculas, minúsculas y caracteres de los tokens. No comprueba la existencia del comando ni impone el formato de nombres de la configuración.
@@ -130,7 +130,18 @@ Los comportamientos de `core/internalCommands.ts` son funciones sin acceso al DO
 - `clearCommand()`: devuelve `{ type: 'clear' }`, una solicitud para limpiar exclusivamente la salida visual; no modifica el historial.
 - `historyCommand(previousHistory, currentInput)`: recibe instrucciones anteriores en orden cronológico y, por separado, el texto original de la ejecución actual. Devuelve entradas `{ number, input }` numeradas desde uno, incluida la actual, sin normalizar ni deduplicar textos. El llamador conserva el historial y debe registrar la instrucción actual exactamente una vez. No se intenta inferir si ya estaba registrada por comparación de texto, porque dos ejecuciones consecutivas pueden ser idénticas.
 
-`core/commandResults.ts` define la unión discriminada `CommandResult` (`help`, `clear`, `history`, `error`) para que el futuro CommandExecutor pueda devolver estos mismos datos sin acoplarse a la presentación. No se implementa aún despacho, ejecución de comandos personalizados ni interfaz de terminal.
+`core/commandResults.ts` define la unión discriminada `CommandResult` (`help`, `clear`, `history`, `text`, `markdown`, `list`, `error`). `CommandExecutor.execute(input, { history })` devuelve una promesa de un arreglo de resultados, sin JSX. Las entradas vacías devuelven `[]`. El contexto contiene únicamente instrucciones anteriores; el llamador conserva y registra la actual exactamente una vez. El ejecutor no almacena historial.
+
+El ejecutor reutiliza el parser, el registro y los comportamientos internos. Rechaza argumentos para `clear`, `history` y comandos `document`; `help` admite un destino. Las búsquedas conservan mayúsculas y minúsculas. Los errores incluyen códigos estables y mensajes en el idioma configurado: `TOO_MANY_ARGUMENTS`, `UNSUPPORTED_SYNTAX`, `COMMAND_NOT_FOUND`, `INVALID_ARGUMENTS`, `DOCUMENT_NOT_FOUND`, `COLLECTION_NOT_FOUND`, `DOCUMENT_NOT_IN_COLLECTION` y `CONTENT_ERROR`. Los fallos del servicio conservan `cause` para depuración y no devuelven resultados parciales.
+
+`content/ContentService.ts` declara solo tres operaciones: `getDocument(id)` y `getCollection(id)` consultan sincrónicamente el catálogo validado, y `getMarkdown(documentId)` devuelve una promesa del cuerpo Markdown. No hay implementación HTTP en este incremento.
+
+- `document` solicita el documento referenciado y devuelve su Markdown intacto.
+- `collection` sin argumento devuelve su introducción y una sugerencia localizada para ejecutar el nombre canónico seguido de `list`, incluso cuando se invoca mediante alias.
+- `collection list` devuelve ID, título y descripción de todos los documentos enumerados, en el orden configurado, sin recuperar sus cuerpos Markdown. No añade la introducción salvo que esté enumerada.
+- Otro argumento debe coincidir exactamente con un ID enumerado o con la introducción. Un documento global ajeno se rechaza antes de consultar su cuerpo.
+
+La interfaz React no se conecta aún al ejecutor. No hay flags, búsqueda, navegación, plugins, persistencia ni caché de Markdown en esta tarea.
 
 ## Forma de trabajo
 

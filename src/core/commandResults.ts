@@ -33,5 +33,33 @@ export interface HistoryResult {
   entries: readonly { number: number; input: string }[]
 }
 
-// Resultados actuales para el futuro ejecutor; no contiene lógica de despacho.
+export interface TextResult {
+  type: 'text'
+  text: string
+}
+
+export interface MarkdownResult {
+  type: 'markdown'
+  documentId: string
+  title: string
+  markdown: string
+}
+
+export interface ListResult {
+  type: 'list'
+  title: string
+  items: readonly { id: string; title: string; description?: string }[]
+}
+
+export interface ExecutionErrorResult {
+  type: 'error'
+  code: 'TOO_MANY_ARGUMENTS' | 'UNSUPPORTED_SYNTAX' | 'INVALID_ARGUMENTS'
+    | 'DOCUMENT_NOT_FOUND' | 'COLLECTION_NOT_FOUND' | 'DOCUMENT_NOT_IN_COLLECTION' | 'CONTENT_ERROR'
+  message: string
+  command?: string
+  argument?: string
+  cause?: unknown
+}
+
 export type CommandResult = HelpResult | CommandNotFoundResult | ClearResult | HistoryResult
+  | TextResult | MarkdownResult | ListResult | ExecutionErrorResult
