@@ -6,6 +6,7 @@ import siteJson from '../../public/example-content/config/site.json?raw'
 import commandsJson from '../../public/example-content/config/commands.json?raw'
 import contentJson from '../../public/example-content/config/content.json?raw'
 
+const exampleName: string = JSON.parse(siteJson).name
 const examples: Record<string, string> = { 'site.json': siteJson, 'commands.json': commandsJson, 'content.json': contentJson }
 import { App } from './App'
 import { bootstrapConfiguration } from './bootstrap'
@@ -34,13 +35,13 @@ describe('Interfaz de arranque', () => {
 
   it('presenta los datos, colores y metadatos de una configuración válida', async () => {
     render(<App load={exampleLoader()} />)
-    expect(await screen.findByRole('heading', { level: 1, name: 'El cuaderno de Ada' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { level: 1, name: exampleName })).toBeTruthy()
     expect(screen.getByText(/Un espacio ficticio/)).toBeTruthy()
     const panel = screen.getByRole('region', { name: 'Bienvenida' })
     expect(panel.style.backgroundColor).toBe('rgb(41, 44, 50)')
     expect(panel.style.color).toBe('rgb(150, 217, 165)')
     expect(panel.textContent).toContain('Bienvenido al cuaderno.')
-    await waitFor(() => expect(document.title).toBe('El cuaderno de Ada'))
+    await waitFor(() => expect(document.title).toBe(exampleName))
     expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toContain('Un espacio ficticio')
     expect(document.documentElement.lang).toBe('es')
     expect(screen.queryByRole('textbox')).toBeNull()
@@ -51,11 +52,11 @@ describe('Interfaz de arranque', () => {
     const load = exampleLoader(fetch)
     render(<App load={load} />)
     expect(await screen.findByRole('alert')).toBeTruthy()
-    expect(screen.queryByText('El cuaderno de Ada')).toBeNull()
+    expect(screen.queryByText(exampleName)).toBeNull()
     fetch.mockImplementation(exampleFetch())
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
     expect(screen.getByRole('status')).toBeTruthy()
-    expect(await screen.findByRole('heading', { name: 'El cuaderno de Ada' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: exampleName })).toBeTruthy()
     expect(fetch).toHaveBeenCalledTimes(6)
   })
 
@@ -83,7 +84,7 @@ describe('Interfaz de arranque', () => {
   it('tolera StrictMode e ignora resultados de efectos que ya no están activos', async () => {
     const load = vi.fn(exampleLoader())
     render(<StrictMode><App load={load} /></StrictMode>)
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'El cuaderno de Ada' })).toBeTruthy())
+    await waitFor(() => expect(screen.getByRole('heading', { name: exampleName })).toBeTruthy())
     expect(screen.queryByRole('alert')).toBeNull()
   })
 })

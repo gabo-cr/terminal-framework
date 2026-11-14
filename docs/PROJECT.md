@@ -97,7 +97,7 @@ La sintaxis concreta para las operaciones de colección y las políticas de erro
 
 Los colores de `theme` se aplican al panel y a sus acentos. La primera interfaz es adaptable a móvil y escritorio y no acepta comandos. La presentación está separada del hook de carga y del bootstrap. El nombre y la descripción actualizan el título y la meta descripción HTML; `locale` actualiza el idioma del documento. Antes de recibir una configuración válida, los mensajes usan el idioma inicial del navegador (`en` o, como alternativa, `es`). La configuración ficticia en `public/example-content` permite probar el arranque por HTTP local con Vite.
 
-## Primer incremento: alcance actual
+## Primer incremento
 
 El trabajo de implementación se limita a:
 
@@ -110,6 +110,15 @@ El trabajo de implementación se limita a:
 No implementar todavía la terminal interactiva, el motor de comandos, la descarga y renderización de Markdown ni su caché. El comportamiento de terminal descrito arriba es contexto para incrementos posteriores, no trabajo autorizado en este incremento.
 
 La tarea documental inicial únicamente crea la documentación de contexto: no crea la aplicación ni instala dependencias.
+
+## Incremento 2: alcance actual
+
+La primera tarea del motor implementa exclusivamente `parseCommand` en `src/core`, sin dependencias de React, configuración ni HTTP. No incluye CommandRegistry, CommandExecutor ni interfaz de entrada.
+
+- Devuelve una unión discriminada por `status`: `valid` con `command` (`name` y `argument` opcional), `empty`, o `error` con código estable.
+- Recorta espacios exteriores, admite separadores de espacio en blanco (incluidas tabulaciones) y conserva mayúsculas, minúsculas y caracteres de los tokens. No comprueba la existencia del comando ni impone el formato de nombres de la configuración.
+- Rechaza más de un argumento con `TOO_MANY_ARGUMENTS`.
+- Rechaza flags (tokens que empiezan con `-`), comillas, backticks, barras invertidas, pipes, redirecciones, `;`, `&` y saltos de línea internos con `UNSUPPORTED_SYNTAX`. Esta comprobación tiene prioridad sobre la cantidad de argumentos. No interpreta sintaxis de shell. Los saltos de línea exteriores se eliminan con el resto del espacio exterior.
 
 ## Forma de trabajo
 

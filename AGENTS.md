@@ -3,7 +3,7 @@
 - Lee `docs/PROJECT.md` antes de trabajar: contiene la visión, la arquitectura aprobada y los límites del MVP.
 - Usa pnpm para instalar dependencias y ejecutar scripts. Conserva `pnpm-lock.yaml` como único lockfile y respeta la versión fijada en `package.json`.
 - Trabaja incrementalmente, con cambios pequeños y verificables. Implementa solo el incremento solicitado.
-- El primer incremento abarca infraestructura, carga remota de los tres JSON, validación de contratos y referencias, y presentación básica del nombre y la descripción. No implementes todavía la terminal interactiva ni el motor de comandos.
+- El primer incremento abarca infraestructura, carga remota de los tres JSON, validación de contratos y referencias, y presentación básica del sitio. En el Incremento 2, el alcance autorizado por ahora es únicamente el parser puro en `src/core`; no implementes todavía CommandRegistry, CommandExecutor ni terminal interactiva.
 - Usa React, TypeScript, Vite, Tailwind CSS, Zod y Vitest. Mantén el core independiente de React y respeta los módulos previstos en `docs/PROJECT.md`.
 - Obtén configuración y contenidos de la raíz definida mediante `VITE_CONTENT_BASE_URL`; no acoples la aplicación al contenido del primer sitio personal.
 - Impide el estado `ready` ante cualquier JSON inválido, fallo de carga de configuración o referencia inválida. Los Markdown se cargarán bajo demanda en un incremento posterior.
