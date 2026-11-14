@@ -67,7 +67,7 @@ Todas las rutas de documento, incluidas las de documentos no referenciados, debe
 ### Carga remota
 
 - `ConfigurationLoader` es independiente de React y Vite; recibe la raíz, la opción de desarrollo y un `fetch` inyectable.
-- El adaptador de arranque `src/app/loadConfiguration.ts` lee `VITE_CONTENT_BASE_URL` e `import.meta.env.DEV` y delega en `bootstrapConfiguration` (`src/app/bootstrap.ts`). Este bootstrap no depende de React ni Vite: recibe raíz, opción de desarrollo y `fetch` inyectable; carga los archivos, aplica esquemas y defaults, valida referencias y rutas, y solo entonces devuelve la configuración completa. El arranque monta la página temporal únicamente si todo termina correctamente; ante errores registra el diagnóstico en consola. La UI de carga y errores queda pendiente.
+- El adaptador de arranque `src/app/loadConfiguration.ts` lee `VITE_CONTENT_BASE_URL` e `import.meta.env.DEV` y delega en `bootstrapConfiguration` (`src/app/bootstrap.ts`). Este bootstrap no depende de React ni Vite: recibe raíz, opción de desarrollo y `fetch` inyectable; carga los archivos, aplica esquemas y defaults, valida referencias y rutas, y solo entonces devuelve la configuración completa. React se monta inmediatamente y un hook de carga ejecuta el bootstrap. Los estados son `loading`, `ready` y `error`; solo se muestra el sitio al completar todas las validaciones. El reintento vuelve a ejecutar el bootstrap y los resultados de efectos descartados no actualizan el estado.
 - La raíz es una URL absoluta HTTPS, normalizada con barra final. Se permite HTTP solo con desarrollo habilitado y host local (`localhost`, `127.0.0.1` o `[::1]`). Se rechazan credenciales, parámetros, fragmentos y segmentos ambiguos.
 - Se solicitan en paralelo `config/site.json`, `config/commands.json` y `config/content.json`, se comprueba HTTP, se parsea JSON y se aplican los esquemas existentes. Cualquier fallo rechaza el resultado completo; no se devuelve configuración parcial ni se declara `ready`.
 - `ConfigurationError.kind` distingue `invalid-base-url`, `unsafe-path`, `network`, `http`, `invalid-json`, `validation` y `cross-validation`. Los códigos estables en `code` son `INVALID_BASE_URL`, `UNSAFE_PATH`, `NETWORK_ERROR`, `HTTP_ERROR`, `INVALID_JSON`, `SCHEMA_VALIDATION_ERROR` y `CROSS_VALIDATION_ERROR`. Conserva URL, estado HTTP cuando procede y causa original (incluidos los errores de Zod con sus rutas). Un fallo de lectura del cuerpo se considera de red.
@@ -95,7 +95,7 @@ La sintaxis concreta para las operaciones de colección y las políticas de erro
 - Separadores entre ejecuciones.
 - Markdown renderizado dentro de la terminal.
 
-Los colores básicos son configurables mediante `theme`. Su aplicación a la interfaz queda para un incremento posterior.
+Los colores de `theme` se aplican al panel y a sus acentos. La primera interfaz es adaptable a móvil y escritorio y no acepta comandos. La presentación está separada del hook de carga y del bootstrap. El nombre y la descripción actualizan el título y la meta descripción HTML; `locale` actualiza el idioma del documento. Antes de recibir una configuración válida, los mensajes usan el idioma inicial del navegador (`en` o, como alternativa, `es`). La configuración ficticia en `public/example-content` permite probar el arranque por HTTP local con Vite.
 
 ## Primer incremento: alcance actual
 

@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "commands": [
+    { "type": "document", "name": "about", "description": "Sobre este cuaderno", "aliases": ["acerca"], "content": "intro" },
+    { "type": "collection", "name": "essays", "description": "Ensayos ficticios", "collection": "essays" }
+  ]
+}

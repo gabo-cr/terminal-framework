@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "collections": [ { "id": "essays", "title": "Ensayos", "intro": "intro", "documents": ["first-essay"] } ],
+  "documents": [
+    { "id": "intro", "title": "El cuaderno", "path": "documents/intro.md", "format": "markdown" },
+    { "id": "first-essay", "title": "Una máquina y un poema", "path": "documents/first-essay.md", "format": "markdown" }
+  ]
+}

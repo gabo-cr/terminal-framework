@@ -2,7 +2,7 @@
 
 Framework para sitios personales explorables mediante una terminal interactiva.
 Este incremento contiene la base técnica, los contratos de configuración,
-su carga remota y una página temporal.
+su carga remota y la primera interfaz de presentación.
 Consulta [el contexto del proyecto](docs/PROJECT.md) para conocer el alcance aprobado.
 
 ## Desarrollo
@@ -28,12 +28,25 @@ La raíz requiere HTTPS; HTTP solo funciona en desarrollo con `localhost`,
 origen de la aplicación si ambos son distintos. La variable se incorpora al
 bundle durante el build, según el comportamiento de Vite.
 
-La página temporal se monta después de cargar y validar los tres archivos.
-Si falla la configuración, el arranque se detiene y registra el error en consola;
-la presentación de estados de carga y error queda para un próximo incremento.
-El bootstrap valida también conflictos entre nombres y alias, referencias entre
-archivos, la reserva de `list` dentro de las colecciones y las rutas de todos los
-documentos. No se descargan documentos Markdown.
+React muestra estados de carga, error con reintento y contenido listo. El bootstrap
+valida los tres archivos y sus referencias antes de mostrar el sitio. Los colores,
+la bienvenida, el título HTML y la descripción se toman de la configuración.
+Antes de conocer el idioma del sitio, carga y errores usan el idioma del navegador
+(inglés si empieza por `en`, español en los demás casos).
+
+## Ejemplo por HTTP
+
+Los archivos ficticios están en `public/example-content`, incluidos dos Markdown
+que aún no se descargan ni renderizan. Para probarlos con Vite:
+
+```sh
+VITE_CONTENT_BASE_URL=http://localhost:5173/example-content pnpm run dev --port 5173 --strictPort
+```
+
+Abre `http://localhost:5173`. Puedes modificar un JSON del ejemplo para provocar
+un error, restaurarlo y pulsar «Reintentar» sin recargar la página.
+Para un build de producción se requiere una raíz HTTPS; la excepción HTTP local
+solo se habilita en desarrollo. Los ejemplos públicos se incluyen en `dist/`.
 
 ## Verificación
 
