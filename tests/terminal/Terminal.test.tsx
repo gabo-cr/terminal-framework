@@ -49,10 +49,10 @@ describe('composición visual de terminal', () => {
     expect((screen.getByRole('textbox', { name: 'Command' }) as HTMLInputElement).value).toBe('help')
   })
 
-  it('no interpreta HTML ni Markdown de los resultados', () => {
+  it('renderiza Markdown y descarta HTML crudo de los resultados', () => {
     const { container } = render(<TerminalOutput result={{ type: 'markdown', documentId: 'test', title: 'Test', markdown: '# Título\n<script>alert(1)</script>\n**Texto**' }} />)
     expect(container.querySelector('script')).toBeNull()
-    expect(container.textContent).toContain('<script>alert(1)</script>')
-    expect(container.querySelector('strong')).toBeNull()
+    expect(container.querySelector('h1')?.textContent).toBe('Título')
+    expect(container.querySelector('strong')?.textContent).toBe('Texto')
   })
 })

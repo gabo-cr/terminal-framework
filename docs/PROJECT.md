@@ -303,11 +303,43 @@ El resultado `{ type: 'clear' }` vacía únicamente `entries`: no deja una ejecu
 de clear visible ni borra comandos, bienvenida o caché. El hook no conoce HTTP,
 no modifica el comportamiento del Core y no conserva otro historial en el motor.
 
-`TerminalOutput` presenta los tipos existentes: texto, Markdown original como
-texto seguro, ayuda, listados, historial y errores. Clear se aplica en el
-controlador. No se interpreta HTML ni se incorpora una biblioteca Markdown.
+`TerminalOutput` presenta los tipos existentes: texto literal, Markdown renderizado,
+ayuda, listados con ID/título/descripción, historial y errores diferenciados mediante
+`role="alert"`. La causa de depuración no se muestra al visitante. Clear se aplica
+en el controlador y no produce contenido visible.
 Los colores, bienvenida, metadatos y estados de inicialización siguen configurados
 por el sitio. No hay muestras de contenido personal en producción.
+
+### Renderizado seguro de Markdown
+
+`MarkdownRenderer` recibe únicamente la cadena `markdown` y usa react-markdown.
+Soporta CommonMark: encabezados, párrafos, negrita, cursiva, listas ordenadas y no
+ordenadas, enlaces, citas, separadores, código en línea y bloques de código.
+Los estilos Tailwind están acotados a `.terminal-markdown`, con jerarquía de
+encabezados, resultados claros, enlaces subrayados y foco visible. El acento de
+los enlaces proviene de `site.theme.accentColor`. Los bloques preservan espacios,
+limitan su ancho, admiten desplazamiento horizontal y reciben foco de teclado.
+
+La configuración usa `skipHtml` y conserva el filtro `defaultUrlTransform` de la
+biblioteca, restringido además a HTTP, HTTPS, mailto y referencias relativas o
+fragmentos. Rechaza controles, barras invertidas y protocolos no permitidos. Las
+URLs bloqueadas se muestran como texto sin enlace. Los enlaces web absolutos
+(incluidos los que comienzan con `//`) abren una nueva pestaña con
+`rel="noopener noreferrer"`; enlaces relativos, fragmentos y correo conservan su
+comportamiento nativo sin abrir una pestaña nueva. Las referencias relativas se
+resuelven por el navegador respecto a la página, no respecto al archivo Markdown.
+
+No se usa dangerouslySetInnerHTML, rehype-raw ni plugins de Markdown adicionales.
+Las imágenes se presentan como texto alternativo, sin elementos `img` ni descargas
+implícitas. El renderer no obtiene contenido por HTTP, interpreta comandos o
+modifica catálogo/caché. No incorpora resaltado de sintaxis, tablas GFM ni navegación
+interna personalizada en esta tarea.
+
+Se sigue la [API y recomendaciones de seguridad de react-markdown](https://github.com/remarkjs/react-markdown#security).
+Las pruebas en `tests/terminal/MarkdownRenderer.test.tsx` verifican los elementos
+soportados, aislamiento de enlaces, URLs peligrosas, omisión de HTML, conservación
+del código y los resultados text/list/error/clear. Las pruebas de sesión siguen
+comprobando que clear conserva la bienvenida y el historial de comandos.
 
 ## Forma de trabajo
 

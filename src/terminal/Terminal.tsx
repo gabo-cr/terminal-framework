@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import type { CSSProperties } from 'react'
 import { TerminalHistory } from './TerminalHistory'
 import { TerminalOutput } from './TerminalOutput'
 import { TerminalPrompt } from './TerminalPrompt'
@@ -18,7 +19,7 @@ export interface TerminalProps {
 export function Terminal({ welcome, theme, entries = [], promptValue, labels, onInputChange, onSubmit, pending }: TerminalProps) {
   const titleId = useId()
   return (
-    <section aria-labelledby={titleId} className="mx-auto w-full min-w-0 max-w-3xl overflow-hidden rounded-xl border border-black/10 shadow-lg shadow-black/10" style={{ backgroundColor: theme.terminalBackground, color: theme.accentColor }}>
+    <section aria-labelledby={titleId} className="mx-auto w-full min-w-0 max-w-3xl overflow-hidden rounded-xl border border-black/10 shadow-lg shadow-black/10" style={{ backgroundColor: theme.terminalBackground, color: theme.accentColor, '--terminal-accent': theme.accentColor } as CSSProperties}>
       <header className="flex items-center gap-4 border-b border-white/10 px-5 py-4 sm:px-7">
         <div aria-hidden="true" className="flex gap-1.5">
           <span className="size-2.5 rounded-full bg-zinc-500" />
