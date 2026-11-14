@@ -145,6 +145,24 @@ El ejecutor reutiliza el parser, el registro y los comportamientos internos. Rec
 
 La interfaz React no se conecta aún al ejecutor. No hay flags, búsqueda, navegación, plugins, persistencia ni caché de Markdown en esta tarea.
 
+## Incremento 3: catálogo de contenidos
+
+`ContentCatalog` en `src/content` recibe `ContentConfig` después de validar esquemas y referencias durante la inicialización. No repite esas validaciones, descarga Markdown ni accede a React o HTTP.
+
+| Consulta | Resultado |
+| --- | --- |
+| `getDocument(id)` | Documento por ID global, o `undefined`. |
+| `getCollection(id)` | Colección por ID, o `undefined`. |
+| `getIntroduction(collectionId)` | Documento introductorio, o `undefined` si la colección no existe. |
+| `listDocuments(collectionId)` | Documentos en el orden exacto de `documents`; `[]` para una colección vacía y `undefined` para una inexistente. |
+| `isDocumentInCollection(documentId, collectionId)` | Pertenencia a los documentos enumerados o a la introducción, igual que en el motor; `false` para IDs inexistentes. |
+
+El listado no añade la introducción automáticamente. Se permiten documentos compartidos entre colecciones, documentos globales sin colección y colecciones vacías con introducción obligatoria. Las búsquedas son exactas y los índices de documentos y colecciones son independientes.
+
+Usa mapas por ID y conjuntos de pertenencia: documento, introducción y pertenencia se consultan en O(1); obtener una colección o listar sus documentos requiere O(n) para copiar el arreglo correspondiente. El constructor toma una copia del catálogo y las consultas devuelven copias, para impedir que cambios externos desincronicen los índices o alteren el orden. No expone operaciones de escritura.
+
+`ContentService` conserva su contrato. El catálogo implementa su parte síncrona (`getDocument` y `getCollection`); un servicio futuro podrá componer estas consultas con `getMarkdown`. Esta tarea solo verifica esa composición con un cuerpo simulado en pruebas y no conecta un servicio real al arranque ni modifica el motor.
+
 ## Forma de trabajo
 
 - Usar pnpm como gestor de paquetes, con versión fijada en `package.json` y `pnpm-lock.yaml` como único lockfile.
