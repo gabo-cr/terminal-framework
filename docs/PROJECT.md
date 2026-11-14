@@ -47,7 +47,7 @@ Requiere el arreglo `commands`, que puede estar vacío. Cada comando tiene `type
 - `type: "document"`: requiere `content` y prohíbe `collection`.
 - `type: "collection"`: requiere `collection` y prohíbe `content`.
 
-`description` debe contener texto no vacío. Las referencias usan el formato de ID del catálogo. Todavía no se validan colisiones entre comandos ni la existencia de sus referencias.
+`description` debe contener texto no vacío. Las referencias usan el formato de ID del catálogo. La validación cruzada comprueba la existencia de sus destinos y rechaza colisiones entre nombres y alias, incluso alias repetidos dentro del mismo comando o iguales a su propio nombre.
 
 ### `content.json`
 
@@ -58,18 +58,23 @@ Requiere los arreglos `collections` y `documents`, que pueden estar vacíos.
 
 Los títulos y las rutas requieren texto no vacío. Los IDs usan segmentos alfanuméricos ASCII en minúsculas separados por un solo guion (`intro`, `essay-2`, `2026-notes`); no admiten guiones iniciales, finales ni consecutivos. Son únicos dentro de su tipo; una colección y un documento pueden compartir ID. Las cadenas con texto obligatorio rechazan espacios en blanco como único contenido, pero no se recortan ni normalizan.
 
-La validación estructural no comprueba todavía la existencia de los IDs referenciados por `intro`, `documents` o los comandos. La validación cruzada queda para una tarea posterior. No se imponen aún reglas de URL o extensión al campo `path` del catálogo; la resolución segura de rutas es una función independiente y no descarga Markdown.
+Los esquemas validan la estructura; después, la validación cruzada comprueba la existencia de los IDs referenciados por `intro`, `documents` y los comandos. Las referencias se comprueban por tipo: un ID de colección no sirve como referencia a un documento y viceversa. La introducción puede aparecer también en la lista de documentos, pero esa lista no permite repeticiones.
+
+`list` se reserva dentro de todas las colecciones: no puede ser el ID de su introducción ni de un documento enumerado. Puede existir un documento global `list` si ninguna colección lo expone. No se restringe `list` como nombre de comando global.
+
+Todas las rutas de documento, incluidas las de documentos no referenciados, deben pasar `resolveSafeRelativeUrl` dentro de la raíz configurada. No se impone una extensión ni se comprueba la existencia del archivo Markdown durante el arranque.
 
 ### Carga remota
 
 - `ConfigurationLoader` es independiente de React y Vite; recibe la raíz, la opción de desarrollo y un `fetch` inyectable.
-- El adaptador de arranque `src/app/loadConfiguration.ts` lee `VITE_CONTENT_BASE_URL` e `import.meta.env.DEV`. El arranque monta la página temporal únicamente si el cargador termina correctamente; ante errores registra el diagnóstico en consola. La UI de carga y errores queda pendiente.
+- El adaptador de arranque `src/app/loadConfiguration.ts` lee `VITE_CONTENT_BASE_URL` e `import.meta.env.DEV` y delega en `bootstrapConfiguration` (`src/app/bootstrap.ts`). Este bootstrap no depende de React ni Vite: recibe raíz, opción de desarrollo y `fetch` inyectable; carga los archivos, aplica esquemas y defaults, valida referencias y rutas, y solo entonces devuelve la configuración completa. El arranque monta la página temporal únicamente si todo termina correctamente; ante errores registra el diagnóstico en consola. La UI de carga y errores queda pendiente.
 - La raíz es una URL absoluta HTTPS, normalizada con barra final. Se permite HTTP solo con desarrollo habilitado y host local (`localhost`, `127.0.0.1` o `[::1]`). Se rechazan credenciales, parámetros, fragmentos y segmentos ambiguos.
 - Se solicitan en paralelo `config/site.json`, `config/commands.json` y `config/content.json`, se comprueba HTTP, se parsea JSON y se aplican los esquemas existentes. Cualquier fallo rechaza el resultado completo; no se devuelve configuración parcial ni se declara `ready`.
-- `ConfigurationError.kind` distingue `invalid-base-url`, `unsafe-path`, `network`, `http`, `invalid-json` y `validation`. Conserva URL, estado HTTP cuando procede y causa original. Un fallo de lectura del cuerpo se considera de red.
+- `ConfigurationError.kind` distingue `invalid-base-url`, `unsafe-path`, `network`, `http`, `invalid-json`, `validation` y `cross-validation`. Los códigos estables en `code` son `INVALID_BASE_URL`, `UNSAFE_PATH`, `NETWORK_ERROR`, `HTTP_ERROR`, `INVALID_JSON`, `SCHEMA_VALIDATION_ERROR` y `CROSS_VALIDATION_ERROR`. Conserva URL, estado HTTP cuando procede y causa original (incluidos los errores de Zod con sus rutas). Un fallo de lectura del cuerpo se considera de red.
+- Los errores cruzados se acumulan en `details` con código, archivo, ruta del campo, valor y, en colisiones, ruta del primer uso. Los códigos son `COMMAND_CONFLICT`, `DOCUMENT_NOT_FOUND`, `COLLECTION_NOT_FOUND`, `INTRO_NOT_FOUND`, `COLLECTION_DOCUMENT_NOT_FOUND`, `DUPLICATE_COLLECTION_DOCUMENT`, `RESERVED_COLLECTION_DOCUMENT` y `UNSAFE_DOCUMENT_PATH`. Las repeticiones estructurales detectadas antes por Zod mantienen `SCHEMA_VALIDATION_ERROR`.
 - `resolveSafeRelativeUrl` permite rutas relativas dentro de la raíz. Rechaza rutas absolutas, segmentos `.` y `..`, barras invertidas, segmentos vacíos, parámetros, fragmentos, controles y sus variantes codificadas. Rechaza porcentajes residuales tras decodificar para impedir ambigüedad por doble codificación.
 - Las solicitudes omiten credenciales y rechazan redirecciones para mantener el límite de la raíz. El servidor externo debe habilitar CORS cuando corresponda. Los rechazos de CORS o de redirección se reciben como errores de red de Fetch.
-- No hay reintentos, caché de configuración, validación cruzada ni descarga de Markdown en este incremento.
+- No hay reintentos, caché de configuración ni descarga de Markdown en este incremento. El cargador sigue encargado únicamente de transporte y esquemas; la validación cruzada y la condición de éxito completo corresponden al bootstrap.
 
 ## Comportamiento del MVP
 
@@ -80,7 +85,7 @@ La validación estructural no comprueba todavía la existencia de los IDs refere
 - La inicialización es estricta: cualquier fallo de carga o validación de un JSON, o cualquier referencia inválida, impide alcanzar el estado `ready`.
 - Los documentos Markdown se descargan bajo demanda y se cachean durante la sesión. Su descarga no forma parte de la validación inicial de los JSON y sus referencias.
 
-La sintaxis concreta para las operaciones de colección, las reglas de colisiones entre nombres y alias y las políticas de error de descarga de Markdown quedan pendientes de definición en sus incrementos correspondientes.
+La sintaxis concreta para las operaciones de colección y las políticas de error de descarga de Markdown quedan pendientes de definición en sus incrementos correspondientes.
 
 ## Identidad visual inicial
 

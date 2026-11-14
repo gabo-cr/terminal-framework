@@ -31,7 +31,9 @@ bundle durante el build, según el comportamiento de Vite.
 La página temporal se monta después de cargar y validar los tres archivos.
 Si falla la configuración, el arranque se detiene y registra el error en consola;
 la presentación de estados de carga y error queda para un próximo incremento.
-No se descargan documentos Markdown ni se validan aún referencias entre archivos.
+El bootstrap valida también conflictos entre nombres y alias, referencias entre
+archivos, la reserva de `list` dentro de las colecciones y las rutas de todos los
+documentos. No se descargan documentos Markdown.
 
 ## Verificación
 

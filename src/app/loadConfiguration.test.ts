@@ -20,8 +20,8 @@ it('lee la raíz desde Vite y la pasa al cargador sin depender de React', async 
   expect(fetch.mock.calls[0]?.[0]).toBe('https://example.com/root/config/site.json')
 })
 
-it('rechaza HTTP local en producción', () => {
+it('rechaza HTTP local en producción', async () => {
   vi.stubEnv('VITE_CONTENT_BASE_URL', 'http://localhost:8080')
   vi.stubEnv('DEV', false)
-  expect(() => loadConfiguration()).toThrow(expect.objectContaining({ kind: 'invalid-base-url' }))
+  await expect(loadConfiguration()).rejects.toMatchObject({ kind: 'invalid-base-url', code: 'INVALID_BASE_URL' })
 })
