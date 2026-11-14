@@ -2,10 +2,11 @@ import { useEffect } from 'react'
 import type { Configuration } from '../configuration/ConfigurationLoader'
 import { loadConfiguration } from './loadConfiguration'
 import { useConfiguration } from './useConfiguration'
+import { Terminal } from '../terminal/Terminal'
 
 const messages = {
-  es: { loading: 'Cargando…', error: 'No pudimos cargar el sitio.', detail: 'Comprueba tu conexión e inténtalo de nuevo. Si el problema continúa, la configuración del sitio puede necesitar una revisión.', retry: 'Reintentar', panel: 'Bienvenida' },
-  en: { loading: 'Loading…', error: 'We could not load this site.', detail: 'Check your connection and try again. If the problem continues, the site configuration may need attention.', retry: 'Try again', panel: 'Welcome' },
+  es: { loading: 'Cargando…', error: 'No pudimos cargar el sitio.', detail: 'Comprueba tu conexión e inténtalo de nuevo. Si el problema continúa, la configuración del sitio puede necesitar una revisión.', retry: 'Reintentar', history: 'Ejecuciones anteriores', input: 'Comando' },
+  en: { loading: 'Loading…', error: 'We could not load this site.', detail: 'Check your connection and try again. If the problem continues, the site configuration may need attention.', retry: 'Try again', history: 'Previous executions', input: 'Command' },
 }
 
 function SitePage({ configuration }: { configuration: Configuration }) {
@@ -29,9 +30,11 @@ function SitePage({ configuration }: { configuration: Configuration }) {
         <h1 className="text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-5xl">{site.name}</h1>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 [overflow-wrap:anywhere] sm:text-lg">{site.description}</p>
       </header>
-      <section aria-label={messages[site.locale].panel} className="min-h-56 rounded-xl border border-black/10 p-6 shadow-sm sm:min-h-72 sm:p-8" style={{ backgroundColor: site.theme.terminalBackground, color: site.theme.accentColor }}>
-        <p className="whitespace-pre-wrap font-mono text-sm leading-7 [overflow-wrap:anywhere] sm:text-base">{site.terminal.welcome}</p>
-      </section>
+      <Terminal
+        welcome={site.terminal.welcome}
+        theme={site.theme}
+        labels={messages[site.locale]}
+      />
     </div>
   )
 }

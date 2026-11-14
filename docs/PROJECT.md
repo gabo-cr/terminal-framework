@@ -275,6 +275,27 @@ cargar Markdown y `clear` sin vaciar la caché ni el historial. Las pruebas nuev
 de `tests/app/contents.integration.test.ts` usan los componentes reales con `fetch`
 simulado en ambos idiomas y conservan todas las pruebas anteriores.
 
+## Incremento 4: estructura visual de terminal
+
+`src/terminal` contiene `Terminal`, `TerminalHistory`, `TerminalEntry`,
+`TerminalOutput` y `TerminalPrompt`. Reciben props de presentación tipadas sin
+importar Core, Configuration ni Content. `TerminalEntryData` describe únicamente
+un ID, el texto del comando y un arreglo de resultados de texto; no modifica los
+contratos del motor.
+
+La página conserva el título, descripción, fondo blanco, estados de carga y error,
+reintento y metadatos. Al completar la configuración muestra el panel centrado,
+con fondo y acento provenientes de `site.theme`, cabecera con tres círculos
+decorativos y título «terminal», bienvenida configurable y prompt de solo lectura.
+Los resultados son texto claro; los comandos y el prompt heredan el acento. Las
+ejecuciones usan separadores, espacios en blanco preservados y ajuste de palabras
+largas para pantallas pequeñas. Las etiquetas accesibles se reciben en es/en.
+
+La aplicación no incluye muestras de historial. Las ejecuciones ficticias existen
+solo en `tests/terminal/Terminal.test.tsx` para comprobar composición, orden,
+separadores y salida como texto seguro. Todavía no hay edición de instrucciones,
+envío, conexión con CommandExecutor, descarga o renderizado Markdown.
+
 ## Forma de trabajo
 
 - Usar pnpm como gestor de paquetes, con versión fijada en `package.json` y `pnpm-lock.yaml` como único lockfile.
