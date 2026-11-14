@@ -58,7 +58,18 @@ Requiere los arreglos `collections` y `documents`, que pueden estar vacíos.
 
 Los títulos y las rutas requieren texto no vacío. Los IDs usan segmentos alfanuméricos ASCII en minúsculas separados por un solo guion (`intro`, `essay-2`, `2026-notes`); no admiten guiones iniciales, finales ni consecutivos. Son únicos dentro de su tipo; una colección y un documento pueden compartir ID. Las cadenas con texto obligatorio rechazan espacios en blanco como único contenido, pero no se recortan ni normalizan.
 
-La validación estructural no comprueba todavía la existencia de los IDs referenciados por `intro`, `documents` o los comandos, ni realiza solicitudes HTTP. La validación cruzada queda para la siguiente tarea. No se imponen aún reglas de URL o extensión a `path`.
+La validación estructural no comprueba todavía la existencia de los IDs referenciados por `intro`, `documents` o los comandos. La validación cruzada queda para una tarea posterior. No se imponen aún reglas de URL o extensión al campo `path` del catálogo; la resolución segura de rutas es una función independiente y no descarga Markdown.
+
+### Carga remota
+
+- `ConfigurationLoader` es independiente de React y Vite; recibe la raíz, la opción de desarrollo y un `fetch` inyectable.
+- El adaptador de arranque `src/app/loadConfiguration.ts` lee `VITE_CONTENT_BASE_URL` e `import.meta.env.DEV`. El arranque monta la página temporal únicamente si el cargador termina correctamente; ante errores registra el diagnóstico en consola. La UI de carga y errores queda pendiente.
+- La raíz es una URL absoluta HTTPS, normalizada con barra final. Se permite HTTP solo con desarrollo habilitado y host local (`localhost`, `127.0.0.1` o `[::1]`). Se rechazan credenciales, parámetros, fragmentos y segmentos ambiguos.
+- Se solicitan en paralelo `config/site.json`, `config/commands.json` y `config/content.json`, se comprueba HTTP, se parsea JSON y se aplican los esquemas existentes. Cualquier fallo rechaza el resultado completo; no se devuelve configuración parcial ni se declara `ready`.
+- `ConfigurationError.kind` distingue `invalid-base-url`, `unsafe-path`, `network`, `http`, `invalid-json` y `validation`. Conserva URL, estado HTTP cuando procede y causa original. Un fallo de lectura del cuerpo se considera de red.
+- `resolveSafeRelativeUrl` permite rutas relativas dentro de la raíz. Rechaza rutas absolutas, segmentos `.` y `..`, barras invertidas, segmentos vacíos, parámetros, fragmentos, controles y sus variantes codificadas. Rechaza porcentajes residuales tras decodificar para impedir ambigüedad por doble codificación.
+- Las solicitudes omiten credenciales y rechazan redirecciones para mantener el límite de la raíz. El servidor externo debe habilitar CORS cuando corresponda. Los rechazos de CORS o de redirección se reciben como errores de red de Fetch.
+- No hay reintentos, caché de configuración, validación cruzada ni descarga de Markdown en este incremento.
 
 ## Comportamiento del MVP
 
