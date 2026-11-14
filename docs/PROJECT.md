@@ -85,7 +85,7 @@ Todas las rutas de documento, incluidas las de documentos no referenciados, debe
 - La inicialización es estricta: cualquier fallo de carga o validación de un JSON, o cualquier referencia inválida, impide alcanzar el estado `ready`.
 - Los documentos Markdown se descargan bajo demanda y se cachean durante la sesión. Su descarga no forma parte de la validación inicial de los JSON y sus referencias.
 
-Las operaciones de colección usan `comando`, `comando list` y `comando <documento>`. La descarga pública de Markdown se describe en el Incremento 3; la caché y el renderizado quedan pendientes.
+Las operaciones de colección usan `comando`, `comando list` y `comando <documento>`. La descarga pública de Markdown se describe en el Incremento 3; la caché de sesión también pertenece al Incremento 3 y el renderizado queda pendiente.
 
 ## Identidad visual inicial
 
@@ -202,6 +202,43 @@ conservar el error del proveedor como causa de `CONTENT_ERROR`.
 El proveedor implementa la parte `getMarkdown` de `ContentService`, complementaria
 al catálogo. No se conecta todavía a React ni al arranque y no incorpora renderizado
 Markdown, caché ni persistencia.
+
+### ContentCache
+
+`new ContentCache(provider)` envuelve un proveedor con `getMarkdown(documentId)`.
+Se crea una instancia por sesión, asociada a un único proveedor de raíz y catálogo
+fijos. Si cambia la raíz o el catálogo, se crea una nueva instancia. No hay caché
+global compartida entre sitios ni dependencia del transporte HTTP.
+
+`getMarkdown(id)` usa el ID como clave y devuelve la misma Promise tanto para
+consultas concurrentes como posteriores a un éxito. La Promise resuelta conserva
+el Markdown original, incluso si es una cadena vacía. Solo la primera consulta
+invoca al proveedor. Los rechazos eliminan la entrada y conservan el error original,
+permitiendo un reintento posterior. Un error síncrono del proveedor también se
+convierte en rechazo y no queda cacheado.
+
+`clear()` elimina todas las entradas sin cancelar las descargas ya iniciadas. Sus
+consumidores originales pueden completarlas, pero una descarga antigua no vuelve
+a insertar contenido ni elimina una solicitud nueva tras la limpieza. Esta es una
+operación interna del servicio y no está vinculada al comando visual `clear`.
+
+La composición mantiene `ContentService` compatible:
+
+```ts
+const catalog = new ContentCatalog(configuration.content)
+const provider = new MarkdownContentProvider({ baseUrl, catalog })
+const cache = new ContentCache(provider)
+const contentService: ContentService = {
+  getDocument: (id) => catalog.getDocument(id),
+  getCollection: (id) => catalog.getCollection(id),
+  getMarkdown: (id) => cache.getMarkdown(id),
+}
+```
+
+En desarrollo HTTP local se pasa además `development: true` al proveedor, según
+las reglas existentes. La caché no conoce comandos, React, rutas ni solicitudes
+HTTP; no incorpora expiración, límites de tamaño ni almacenamiento persistente.
+Esta tarea no conecta el servicio a la UI ni modifica el motor de comandos.
 
 ## Forma de trabajo
 
