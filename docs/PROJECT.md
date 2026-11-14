@@ -85,7 +85,7 @@ Todas las rutas de documento, incluidas las de documentos no referenciados, debe
 - La inicialización es estricta: cualquier fallo de carga o validación de un JSON, o cualquier referencia inválida, impide alcanzar el estado `ready`.
 - Los documentos Markdown se descargan bajo demanda y se cachean durante la sesión. Su descarga no forma parte de la validación inicial de los JSON y sus referencias.
 
-Las operaciones de colección usan `comando`, `comando list` y `comando <documento>`. Las políticas de descarga HTTP de Markdown quedan para un incremento posterior.
+Las operaciones de colección usan `comando`, `comando list` y `comando <documento>`. La descarga pública de Markdown se describe en el Incremento 3; la caché y el renderizado quedan pendientes.
 
 ## Identidad visual inicial
 
@@ -145,7 +145,7 @@ El ejecutor reutiliza el parser, el registro y los comportamientos internos. Rec
 
 La interfaz React no se conecta aún al ejecutor. No hay flags, búsqueda, navegación, plugins, persistencia ni caché de Markdown en esta tarea.
 
-## Incremento 3: catálogo de contenidos
+## Incremento 3: sistema de contenidos
 
 `ContentCatalog` en `src/content` recibe `ContentConfig` después de validar esquemas y referencias durante la inicialización. No repite esas validaciones, descarga Markdown ni accede a React o HTTP.
 
@@ -162,6 +162,46 @@ El listado no añade la introducción automáticamente. Se permiten documentos c
 Usa mapas por ID y conjuntos de pertenencia: documento, introducción y pertenencia se consultan en O(1); obtener una colección o listar sus documentos requiere O(n) para copiar el arreglo correspondiente. El constructor toma una copia del catálogo y las consultas devuelven copias, para impedir que cambios externos desincronicen los índices o alteren el orden. No expone operaciones de escritura.
 
 `ContentService` conserva su contrato. El catálogo implementa su parte síncrona (`getDocument` y `getCollection`); un servicio futuro podrá componer estas consultas con `getMarkdown`. Esta tarea solo verifica esa composición con un cuerpo simulado en pruebas y no conecta un servicio real al arranque ni modifica el motor.
+
+### MarkdownContentProvider
+
+El proveedor recibe `{ baseUrl, catalog, fetch?, development? }`. `baseUrl` es la
+raíz de contenidos, que se comprueba con `normalizeContentBaseUrl`; el catálogo
+solo necesita exponer `getDocument`. `getMarkdown(documentId)` resuelve el ID global,
+obtiene su `path` y utiliza `resolveSafeRelativeUrl` antes de acceder a la red. No
+reimplementa reglas de seguridad ni revalida esquemas.
+
+Las solicitudes usan GET explícito, `credentials: 'omit'` y `redirect: 'error'`.
+HTTPS es obligatorio salvo HTTP local en desarrollo, como en la configuración.
+Rechazar redirecciones evita salir de la raíz mediante una respuesta del servidor.
+El hosting debe permitir acceso público y CORS cuando corresponda; no se requiere
+GitHub Pages ni otro proveedor específico. No se envían tokens ni cabeceras de
+autorización. El `fetch` inyectable permite probar sin servidor real.
+
+`response.ok` se comprueba antes de leer `response.text()`. El texto devuelto no se
+recorta, normaliza, interpreta ni convierte a HTML. Se admiten cuerpos vacíos,
+Unicode y caracteres especiales. Cada llamada realiza una nueva solicitud; el
+proveedor no guarda resultados ni promesas y no modifica la política de caché del
+navegador. La caché de sesión será una responsabilidad separada.
+
+`ContentError` expone códigos estables y contexto de depuración:
+
+| Código | Situación |
+| --- | --- |
+| `DOCUMENT_NOT_FOUND` | ID ausente del catálogo; no se realiza HTTP. |
+| `INVALID_BASE_URL` | Raíz rechazada por las reglas existentes. |
+| `UNSAFE_PATH` | Ruta rechazada antes de descargar. |
+| `HTTP_ERROR` | Respuesta HTTP no exitosa; conserva `status`, URL e ID. |
+| `NETWORK_ERROR` | Rechazo de Fetch o fallo al leer el cuerpo; conserva `cause`, URL e ID. |
+
+CORS y redirecciones bloqueadas se reciben como errores de red de Fetch. Los
+errores de URL conservan la causa original. Estos errores son diagnósticos de la
+capa de contenidos; el motor sigue produciendo sus mensajes localizados y puede
+conservar el error del proveedor como causa de `CONTENT_ERROR`.
+
+El proveedor implementa la parte `getMarkdown` de `ContentService`, complementaria
+al catálogo. No se conecta todavía a React ni al arranque y no incorpora renderizado
+Markdown, caché ni persistencia.
 
 ## Forma de trabajo
 
