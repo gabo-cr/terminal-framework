@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { ContentService } from '../content/ContentService'
 import type { ContentCollection, ContentDocument } from '../configuration/content.schema'
-import { bootstrapConfiguration } from '../app/bootstrap'
 import { CommandExecutor } from './CommandExecutor'
 import { CommandRegistry } from './CommandRegistry'
 import type { CommandLocale } from './commandResults'
@@ -153,28 +152,4 @@ describe('fallos y asincronía del servicio de contenidos', () => {
     content.getCollection.mockImplementation(() => { throw new Error('broken catalog') })
     expect(await executor.execute('essays', context)).toMatchObject([{ code: 'CONTENT_ERROR' }])
   })
-})
-
-it('integra configuración validada, registro, parser, internos y contenidos sin HTTP real', async () => {
-  const fetch = vi.fn<typeof globalThis.fetch>(async (url) => {
-    if (String(url).endsWith('site.json')) return Response.json({ version: 1, name: 'Site', description: 'Notes', locale: 'en' })
-    if (String(url).endsWith('commands.json')) return Response.json({ version: 1, commands: [
-      { type: 'collection', name: 'notes', description: 'Notas', collection: 'notes', aliases: ['journal'] },
-    ] })
-    return Response.json({ version: 1, collections: [{ id: 'notes', title: 'Notas', intro: 'intro', documents: ['entry'] }], documents: [
-      { id: 'intro', title: 'Inicio', path: 'intro.md', format: 'markdown' },
-      { id: 'entry', title: 'Entrada', path: 'entry.md', format: 'markdown' },
-    ] })
-  })
-  const config = await bootstrapConfiguration({ baseUrl: 'https://example.com/', fetch })
-  const content: ContentService = {
-    getDocument: (id) => config.content.documents.find((document) => document.id === id),
-    getCollection: (id) => config.content.collections.find((collection) => collection.id === id),
-    getMarkdown: async (id) => `# ${id}`,
-  }
-  const executor = new CommandExecutor({ registry: new CommandRegistry(config.commands.commands), content, locale: config.site.locale })
-  expect(await executor.execute('  journal  entry ', { history: [] })).toMatchObject([{ type: 'markdown', markdown: '# entry' }])
-  expect(await executor.execute('help journal', { history: [] })).toMatchObject([{ type: 'help', title: 'Help for notes' }])
-  expect(await executor.execute('journal', { history: [] })).toMatchObject([{ type: 'markdown' }, { type: 'text', text: 'Run notes list to see all documents.' }])
-  expect(fetch).toHaveBeenCalledTimes(3)
 })

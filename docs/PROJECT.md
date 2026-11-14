@@ -111,7 +111,9 @@ No implementar todavía la terminal interactiva, el motor de comandos, la descar
 
 La tarea documental inicial únicamente crea la documentación de contexto: no crea la aplicación ni instala dependencias.
 
-## Incremento 2: alcance actual
+## Incremento 2: motor implementado
+
+La revisión final y el contrato de integración se describen en [CORE.md](CORE.md).
 
 El motor comienza con `parseCommand`, `CommandRegistry` y los comportamientos internos `help`, `clear` e `history` en `src/core`, sin dependencias de React ni HTTP. El parser no depende de configuración; el registro reutiliza únicamente sus tipos. Incluye CommandExecutor con un servicio de contenidos inyectable, pero no interfaz de entrada ni descargas HTTP de Markdown.
 

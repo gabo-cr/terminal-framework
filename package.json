@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
+    "typecheck:core": "tsc -p tsconfig.core.json",
     "test": "vitest run"
   },
   "dependencies": {

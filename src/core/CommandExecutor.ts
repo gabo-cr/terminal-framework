@@ -1,7 +1,7 @@
 import type { ContentService } from '../content/ContentService'
 import type { CommandRegistry } from './CommandRegistry'
 import type { CommandLocale, CommandResult, ExecutionErrorResult, MarkdownResult } from './commandResults'
-import { clearCommand, helpCommand, historyCommand } from './internalCommands'
+import { clearCommand, commandNotFoundResult, helpCommand, historyCommand } from './internalCommands'
 import { parseCommand } from './parseCommand'
 
 const messages = {
@@ -55,7 +55,7 @@ export class CommandExecutor {
     if (parsed.status === 'error') return [this.error(parsed.code)]
     const { name, argument } = parsed.command
     const command = this.registry.find(name)
-    if (!command) return [helpCommand({ registry: this.registry, locale: this.locale }, name)]
+    if (!command) return [commandNotFoundResult(name, this.locale)]
 
     if (command.kind === 'internal') {
       if (command.name === 'help') return [helpCommand({ registry: this.registry, locale: this.locale }, argument)]

@@ -56,9 +56,13 @@ export function helpCommand(
   }
   const command = registry.find(argument)
   if (!command) {
-    return { type: 'error', code: 'COMMAND_NOT_FOUND', command: argument, message: text.notFound(argument) }
+    return commandNotFoundResult(argument, locale)
   }
   return { type: 'help', scope: 'command', title: text.specific(command.name), commands: [helpEntry(command, locale)] }
+}
+
+export function commandNotFoundResult(command: string, locale: CommandLocale): CommandNotFoundResult {
+  return { type: 'error', code: 'COMMAND_NOT_FOUND', command, message: messages[locale].notFound(command) }
 }
 
 export function clearCommand(): ClearResult {
