@@ -99,6 +99,29 @@ describe('desplazamiento local y anuncios', () => {
     expect(scrollTo).toHaveBeenCalledTimes(1)
   })
 
+  it('no vuelve al inicio del documento al redimensionar mientras se lee el final', () => {
+    const resizeCallbacks = new Set<() => void>()
+    vi.stubGlobal('ResizeObserver', class {
+      private callback: () => void
+      constructor(callback: () => void) { this.callback = callback }
+      observe() { resizeCallbacks.add(this.callback) }
+      disconnect() { resizeCallbacks.delete(this.callback) }
+    })
+    const entries: TerminalEntryData[] = [{ ...entry, status: 'success', results: [{ type: 'text', text: 'Documento largo' }] }]
+    const { rerender } = render(terminal(entries))
+    const panel = screen.getByRole('region', { name: labels.history })
+    const scrollTo = geometry(panel)
+    panel.scrollTop = 700
+    fireEvent.scroll(panel)
+    // Cambia la geometría sin recibir otra ejecución o resultado.
+    Object.defineProperty(panel, 'clientHeight', { configurable: true, value: 280 })
+    fireEvent(window, new Event('resize'))
+    resizeCallbacks.forEach((callback) => callback())
+    rerender(terminal(entries))
+    expect(scrollTo).not.toHaveBeenCalled()
+    expect(panel.scrollTop).toBe(700)
+  })
+
   it('anuncia solo el indicador de ejecución y conserva la bienvenida al limpiar', () => {
     const { rerender } = render(terminal([entry]))
     expect(screen.getByRole('status').textContent).toBe('Ejecutando…')

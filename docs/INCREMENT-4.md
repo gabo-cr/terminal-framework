@@ -98,18 +98,85 @@ que Vite transforme `new URL(..., import.meta.url)` en una URL web bajo jsdom.
 
 Comprobaciones finales:
 
-- `pnpm run test`: 520 pruebas aprobadas en 24 archivos.
+- `pnpm run test`: 521 pruebas aprobadas en 24 archivos tras la revisión final.
 - `pnpm run typecheck`: correcto.
 - `pnpm run typecheck:core`: correcto, sin bibliotecas DOM ni React en el Core.
 - `pnpm run build`: correcto.
 - `git diff --check`: correcto.
 
+## Revisión final del Incremento 4
+
+Revisión realizada el 14 de noviembre de 2026 sobre los cambios desde el cierre
+del Incremento 3 (`f186e52`) hasta la integración (`ce9fd4f`), más la corrección
+descrita aquí. El árbol de trabajo estaba limpio al comenzar.
+
+### Fallo encontrado y corregido
+
+**P2 — pérdida de la posición de lectura al redimensionar.** Con `code react-hooks`
+y un documento largo, llegar al final con Ctrl+End y pasar de un viewport móvil
+de 375 × 812 a 390 × 844 hacía saltar la salida al principio. ResizeObserver
+ejecutaba de nuevo el seguimiento del último resultado aunque no hubiera una
+ejecución nueva. Antes de corregirlo, la posición pasó de aproximadamente 1601 px
+a 52 px. Tras retirar ese observador, el navegador mantiene el anclaje al final
+(aproximadamente 1471 px con la nueva altura del documento).
+
+El seguimiento sigue ejecutándose ante cambios de resultados y bienvenida,
+respetando si el visitante lee contenido anterior. Se conserva el desplazamiento
+local y la preferencia de movimiento reducido. Una prueba de regresión simula
+redimensionado sin nuevos resultados y comprueba que no se ordena volver al inicio.
+El caso se reprodujo antes y después en el navegador con el código actualizado.
+
+### Matriz de verificación
+
+| Área | Evidencia y resultado |
+| --- | --- |
+| Enter y entrada vacía | Navegador: una entrada de espacios no crea ejecución; Enter ejecuta y limpia el campo. Pruebas: IME, repetición y bloqueo mientras hay una promesa pendiente. |
+| Internos y contenidos | Recorrido real de help, help code, clear, history, about, contact, code, code list, code react-hooks, read, read list y read cuento-001. Introducciones, sugerencias y orden correctos. |
+| Errores | Comando desconocido, 404 y caída del servidor de fixtures muestran errores recuperables. Al restablecer HTTP, about funciona en la misma sesión. |
+| Historial y borrador | Navegador: clear conserva las instrucciones y la bienvenida; arriba recupera el comando, abajo devuelve «mi borrador». Pruebas adicionales conservan alias y espacios originales. |
+| Foco y teclado | El campo mantiene el foco después de ejecutar. Tab/Shift+Tab alcanzan enlaces, bloques de código y entrada; la flecha derecha desplaza el código dentro de su bloque. Pruebas verifican no quitar el foco a un enlace durante una espera. |
+| Diseño adaptable | Inspección real en viewports 1280 × 900, 375 × 812 y 390 × 844. Sin desbordamiento horizontal de página; títulos y palabras largas se ajustan. Esto prueba tamaños de ventana, no un teléfono físico. |
+| Markdown | Encabezados, énfasis, listas, citas, separador, enlace, código y Unicode renderizados. En móvil, la línea ancha conserva unos 1887 px de contenido dentro de un bloque de unos 262–277 px, sin ensanchar la página. |
+| Seguridad de enlaces | En navegador, el enlace HTTPS tiene target=_blank y rel=noopener noreferrer; javascript: aparece como texto sin enlace. Pruebas cubren esquemas peligrosos, HTML crudo y ausencia de imágenes remotas. |
+| Anuncios accesibles | Etiqueta del campo, aria-busy y role=status comprobados en componentes; historial sin aria-live para evitar repetir documentos. Errores con role=alert. No se verificó la locución con un lector de pantalla. |
+| Scroll | El panel conserva la posición al leer una salida anterior; sigue resultados cuando está al final. Corrección de redimensionado comprobada. No se llama a scrollIntoView ni se ordena scroll global; enfocar elementos fuera de la ventana puede causar el ajuste nativo del navegador. |
+
+La fixture `react-hooks.md` se amplió con casos de texto largo, código y enlaces;
+es utilizada por las pruebas HTTP existentes y permite reproducir la revisión
+visual sin modificar JSON ni añadir comandos de producción.
+
+### Contraste y arquitectura
+
+Con los colores predeterminados, los valores calculados a partir de los estilos
+del navegador son 8,51:1 para el acento sobre el panel, 11,04:1 para los resultados
+y 5,32:1 para el texto secundario. El contorno del campo usa el acento y es visible;
+los bloques de código también tienen contorno al enfocarlos con teclado.
+Estos valores no garantizan contraste para cualquier tema personalizado.
+
+La revisión de imports y diferencias confirma:
+
+- Core no importa React ni hace HTTP; `typecheck:core` pasa con su configuración aislada.
+- Terminal no usa fetch ni proveedores; consume tipos y el ejecutor inyectado.
+- MarkdownContentProvider no importa ni interpreta comandos.
+- Los contratos JSON, Core, Configuration y Content no cambiaron en el Incremento 4.
+- VITE_CONTENT_BASE_URL sigue gobernando la carga externa; los Markdown llegan
+  por HTTP y no se importan como módulos de React.
+- No hay datos personales hardcodeados ni nuevas dependencias en esta revisión.
+  react-markdown es la única dependencia de ejecución añadida durante el incremento,
+  conforme al alcance aprobado; no hay xterm, plugins de Markdown ni persistencia.
+
+Archivos de esta revisión: `src/terminal/useTerminalScroll.ts`,
+`tests/terminal/accessibility.test.tsx`, la fixture `documents/react-hooks.md` y
+su README, `docs/PROJECT.md` y este informe. Se conservaron todas las fixtures.
+
 ## Limitaciones
 
-- El recorrido manual se realizó en el navegador integrado en español; inglés
-  también se verifica mediante las pruebas de integración, sin una segunda pasada
-  manual completa. No se ha realizado una auditoría con lector de pantalla ni una
-  matriz de navegadores/dispositivos.
+- El recorrido real se realizó en el navegador integrado en español; inglés
+  se verifica mediante integración automatizada. Quedan pendientes lectores de
+  pantalla, teclado virtual/táctil en teléfonos físicos y otros motores de navegador.
+- Los colores personalizados son libres conforme al contrato aprobado: el autor
+  del sitio debe revisar su contraste. No se añadió un cambio de esquema ni una
+  transformación automática de colores.
 - Se ignoran respuestas obsoletas, pero no se cancelan las solicitudes HTTP que
   ya estaban en curso. No hay reintentos automáticos ni persistencia entre sesiones.
 - VITE_CONTENT_BASE_URL se configura en el proceso de Vite/build; no existe un

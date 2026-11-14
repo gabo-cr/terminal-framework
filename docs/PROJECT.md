@@ -346,7 +346,8 @@ teclado; el prompt queda fuera de esa zona desplazable. `useTerminalScroll`
 sigue las actualizaciones cuando el visitante estaba a 64 px o menos del final.
 Si lee contenido anterior, conserva su posición. Un documento largo se muestra
 desde el inicio de la ejecución reciente, no saltando al final de su texto.
-ResizeObserver contempla cambios de altura; clear vuelve al comienzo del panel.
+Los cambios de tamaño conservan el anclaje de lectura del navegador y no vuelven
+a ejecutar el seguimiento del último resultado; clear vuelve al comienzo del panel.
 No se usa scrollIntoView ni desplazamiento global de la página.
 
 El desplazamiento usa movimiento suave salvo que `prefers-reduced-motion: reduce`
@@ -358,8 +359,10 @@ Los documentos no se anuncian completos en cada actualización.
 Las pruebas en `tests/terminal/accessibility.test.tsx` verifican foco, no interferencia
 con enlaces, estados accesibles y decisiones de scroll con geometría simulada.
 Las pruebas de useTerminal cubren límites de historial, borrador y navegación real
-con teclado. La geometría y el movimiento se simulan en jsdom; una revisión visual
-en navegador y con lectores de pantalla sigue siendo una comprobación manual útil.
+con teclado. La revisión final también verifica en navegador tamaños de escritorio
+y móvil, código largo, foco, navegación y redimensionado. La comprobación con
+lectores de pantalla y dispositivos móviles físicos sigue pendiente; véase
+[INCREMENT-4.md](INCREMENT-4.md).
 
 ### Renderizado seguro de Markdown
 

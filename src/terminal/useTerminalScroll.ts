@@ -32,9 +32,8 @@ export function useTerminalScroll(entries: readonly TerminalEntryData[], welcome
       else panel.scrollTop = top
     }
     followRecent()
-    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(followRecent)
-    observer?.observe(body)
-    return () => observer?.disconnect()
+    // Un cambio de tamaño no es una nueva ejecución: dejamos al navegador
+    // conservar la posición de lectura al reajustar el documento.
   }, [entries, welcome])
 
   return { viewport, content, onScroll }
