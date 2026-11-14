@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "collections": [
+    { "id": "workshop", "title": "Taller", "intro": "workshop-intro", "documents": ["typescript-notes", "react-hooks"] },
+    { "id": "library", "title": "Biblioteca", "intro": "library-intro", "documents": ["cuento-002", "cuento-001"] }
+  ],
+  "documents": [
+    { "id": "about", "title": "Presentación", "path": "documents/about.md", "format": "markdown" },
+    { "id": "contact", "title": "Contacto", "path": "documents/contact.md", "format": "markdown" },
+    { "id": "workshop-intro", "title": "Taller", "path": "documents/workshop.md", "format": "markdown" },
+    { "id": "react-hooks", "title": "React Hooks", "path": "documents/react-hooks.md", "format": "markdown" },
+    { "id": "typescript-notes", "title": "Notas de TypeScript", "path": "documents/typescript-notes.md", "format": "markdown" },
+    { "id": "library-intro", "title": "Biblioteca", "path": "documents/library.md", "format": "markdown" },
+    { "id": "cuento-001", "title": "La puerta azul", "path": "documents/cuento-001.md", "format": "markdown" },
+    { "id": "cuento-002", "title": "El reloj de arena", "path": "documents/cuento-002.md", "format": "markdown" },
+    { "id": "remote-missing", "title": "Documento aún no publicado", "path": "documents/remote-missing.md", "format": "markdown" }
+  ]
+}

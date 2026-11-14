@@ -120,7 +120,7 @@ el ejecutor y la ayuda, sin volver a buscar el comando.
 
 ## Verificación del incremento
 
-`engine.integration.test.ts` conecta bootstrap con JSON simulados, parser, registro,
+`tests/core/engine.integration.test.ts` conecta bootstrap con JSON simulados, parser, registro,
 comandos internos, ejecutor y un servicio de Markdown en memoria. No sustituye los
 módulos del Core por mocks. Prueba sesiones completas en ambos idiomas, orden,
 alias, errores, recuperación y aislamiento de historiales. Falla si se usa el
@@ -167,7 +167,7 @@ está validada. `content.clearCache()` es una operación interna independiente d
 comando visual `clear`. No cambia el contrato de resultados del motor ni convierte
 Markdown a HTML.
 
-`app/contents.integration.test.ts` verifica el trayecto completo con catálogo,
+`tests/app/contents.integration.test.ts` verifica el trayecto completo con catálogo,
 proveedor HTTP y caché reales y respuestas Fetch simuladas: documentos, colecciones,
 alias, internos, mensajes es/en, errores recuperables, reintentos, aislamiento de
 sesiones y solicitudes simultáneas. La suite del Incremento 2 se conserva.

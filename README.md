@@ -34,24 +34,38 @@ la bienvenida, el título HTML y la descripción se toman de la configuración.
 Antes de conocer el idioma del sitio, carga y errores usan el idioma del navegador
 (inglés si empieza por `en`, español en los demás casos).
 
-## Ejemplo por HTTP
+## Fixtures de pruebas
 
-Los archivos ficticios están en `public/example-content`, incluidos dos Markdown
-que aún no se descargan ni renderizan. Para probarlos con Vite:
+Las pruebas automatizadas están en `tests/`, agrupadas por módulo. Las fixtures
+mínimas de UI se conservan en `tests/fixtures/ui-site` y se usan mediante respuestas
+simuladas en `tests/app/App.test.tsx`. Su nombre es genérico y no se incluyen en el
+build de producción. El ejemplo HTTP completo se describe a continuación.
+
+## Sitio externo de pruebas
+
+El conjunto completo del Incremento 3 está en `tests/fixtures/external-site`, servido
+por un proceso HTTP separado de Vite:
 
 ```sh
-VITE_CONTENT_BASE_URL=http://localhost:5173/example-content pnpm run dev --port 5173 --strictPort
+pnpm run fixtures:serve
 ```
 
-Abre `http://localhost:5173`. Puedes modificar un JSON del ejemplo para provocar
-un error, restaurarlo y pulsar «Reintentar» sin recargar la página.
-Para un build de producción se requiere una raíz HTTPS; la excepción HTTP local
-solo se habilita en desarrollo. Los ejemplos públicos se incluyen en `dist/`.
+En otra terminal:
+
+```sh
+VITE_CONTENT_BASE_URL=http://127.0.0.1:4174/ pnpm run dev
+```
+
+Para verificar configuración, motor, descargas reales y caché sin interfaz
+interactiva, ejecuta `pnpm run test:contents:http`. La prueba inicia su propio
+servidor efímero y no necesita que el servidor manual esté activo. Lee el
+[informe de verificación](docs/INCREMENT-3.md) para ver los casos y limitaciones.
 
 ## Verificación
 
 ```sh
 pnpm run typecheck
+pnpm run typecheck:core
 pnpm run test
 pnpm run build
 pnpm run preview

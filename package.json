@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "typecheck:core": "tsc -p tsconfig.core.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "fixtures:serve": "node --experimental-strip-types tests/support/serve-fixtures.ts",
+    "test:contents:http": "vitest run tests/app/contents.http.test.ts"
   },
   "dependencies": {
     "react": "^19.3.1",

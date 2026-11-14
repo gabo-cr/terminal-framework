@@ -95,7 +95,7 @@ Las operaciones de colección usan `comando`, `comando list` y `comando <documen
 - Separadores entre ejecuciones.
 - Markdown renderizado dentro de la terminal.
 
-Los colores de `theme` se aplican al panel y a sus acentos. La primera interfaz es adaptable a móvil y escritorio y no acepta comandos. La presentación está separada del hook de carga y del bootstrap. El nombre y la descripción actualizan el título y la meta descripción HTML; `locale` actualiza el idioma del documento. Antes de recibir una configuración válida, los mensajes usan el idioma inicial del navegador (`en` o, como alternativa, `es`). La configuración ficticia en `public/example-content` permite probar el arranque por HTTP local con Vite.
+Los colores de `theme` se aplican al panel y a sus acentos. La primera interfaz es adaptable a móvil y escritorio y no acepta comandos. La presentación está separada del hook de carga y del bootstrap. El nombre y la descripción actualizan el título y la meta descripción HTML; `locale` actualiza el idioma del documento. Antes de recibir una configuración válida, los mensajes usan el idioma inicial del navegador (`en` o, como alternativa, `es`). Las fixtures de UI están en `tests/fixtures/ui-site`; el sitio HTTP de prueba está en `tests/fixtures/external-site` y se sirve con `pnpm run fixtures:serve`.
 
 ## Primer incremento
 
@@ -146,6 +146,9 @@ El ejecutor reutiliza el parser, el registro y los comportamientos internos. Rec
 La interfaz React no se conecta aún al ejecutor. No hay flags, búsqueda, navegación, plugins, persistencia ni caché de Markdown en esta tarea.
 
 ## Incremento 3: sistema de contenidos
+
+La verificación final, las fixtures externas y los comandos de reproducción se
+describen en [INCREMENT-3.md](INCREMENT-3.md).
 
 `ContentCatalog` en `src/content` recibe `ContentConfig` después de validar esquemas y referencias durante la inicialización. No repite esas validaciones, descarga Markdown ni accede a React o HTTP.
 
@@ -269,7 +272,7 @@ La consulta directa del servicio a un ID ausente sigue rechazando con
 Se mantienen los comportamientos y resultados del Incremento 2, incluidas la
 introducción como documento accesible, la sugerencia canónica, los listados sin
 cargar Markdown y `clear` sin vaciar la caché ni el historial. Las pruebas nuevas
-de `app/contents.integration.test.ts` usan los componentes reales con `fetch`
+de `tests/app/contents.integration.test.ts` usan los componentes reales con `fetch`
 simulado en ambos idiomas y conservan todas las pruebas anteriores.
 
 ## Forma de trabajo

@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "name": "Cuaderno de ejemplo",
+  "description": "Un sitio ficticio de ingeniería, literatura e ideas.",
+  "locale": "es",
+  "terminal": { "welcome": "Bienvenido al cuaderno de prueba." }
+}

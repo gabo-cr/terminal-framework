@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "commands": [
+    { "type": "document", "name": "about", "description": "Presentación", "content": "about", "aliases": ["acerca"] },
+    { "type": "document", "name": "contact", "description": "Contacto", "content": "contact" },
+    { "type": "collection", "name": "code", "description": "Taller", "collection": "workshop" },
+    { "type": "collection", "name": "read", "description": "Biblioteca", "collection": "library" },
+    { "type": "document", "name": "missing", "description": "Archivo ausente para probar errores", "content": "remote-missing" }
+  ]
+}

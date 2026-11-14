@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Cuaderno de ejemplo",
+  "description": "Un espacio ficticio para la ingeniería, la literatura y las ideas.",
+  "locale": "es",
+  "terminal": { "welcome": "Bienvenido al cuaderno.\nAquí conviven las ideas y las historias." },
+  "theme": { "accentColor": "#96D9A5", "terminalBackground": "#292C32" }
+}
