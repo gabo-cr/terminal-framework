@@ -10,8 +10,8 @@ const theme = { accentColor: '#96D9A5', terminalBackground: '#292C32' }
 const labels = { history: 'Ejecuciones anteriores', input: 'Comando' }
 // Estas muestras solo existen en pruebas, nunca en la aplicación publicada.
 const entries: readonly TerminalEntryData[] = [
-  { id: '1', command: 'about', outputs: ['Presentación ficticia.', 'Segunda línea.'] },
-  { id: '2', command: 'code list', outputs: ['Un apunte de ejemplo.'] },
+  { id: '1', command: 'about', status: 'success', results: [{ type: 'text', text: 'Presentación ficticia.' }, { type: 'text', text: 'Segunda línea.' }] },
+  { id: '2', command: 'code list', status: 'success', results: [{ type: 'text', text: 'Un apunte de ejemplo.' }] },
 ]
 afterEach(cleanup)
 
@@ -50,7 +50,7 @@ describe('composición visual de terminal', () => {
   })
 
   it('no interpreta HTML ni Markdown de los resultados', () => {
-    const { container } = render(<TerminalOutput text={'# Título\n<script>alert(1)</script>\n**Texto**'} />)
+    const { container } = render(<TerminalOutput result={{ type: 'markdown', documentId: 'test', title: 'Test', markdown: '# Título\n<script>alert(1)</script>\n**Texto**' }} />)
     expect(container.querySelector('script')).toBeNull()
     expect(container.textContent).toContain('<script>alert(1)</script>')
     expect(container.querySelector('strong')).toBeNull()

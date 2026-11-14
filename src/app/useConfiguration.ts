@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { Configuration } from '../configuration/ConfigurationLoader'
 
-export type ConfigurationState =
+export type ConfigurationState<T = Configuration> =
   | { status: 'loading' }
-  | { status: 'ready'; configuration: Configuration }
+  | { status: 'ready'; configuration: T }
   | { status: 'error'; error: unknown }
 
-export function useConfiguration(load: () => Promise<Configuration>) {
-  const [state, setState] = useState<ConfigurationState>({ status: 'loading' })
+export function useConfiguration<T>(load: () => Promise<T>) {
+  const [state, setState] = useState<ConfigurationState<T>>({ status: 'loading' })
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {

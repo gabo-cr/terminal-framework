@@ -9,7 +9,7 @@ import contentJson from '../fixtures/ui-site/config/content.json?raw'
 const exampleName: string = JSON.parse(siteJson).name
 const examples: Record<string, string> = { 'site.json': siteJson, 'commands.json': commandsJson, 'content.json': contentJson }
 import { App } from '../../src/app/App'
-import { bootstrapConfiguration } from '../../src/app/bootstrap'
+import { bootstrapApplication } from '../../src/app/bootstrapApplication'
 
 function exampleFetch(invalid = false) {
   return vi.fn<typeof globalThis.fetch>(async (input) => {
@@ -21,10 +21,10 @@ function exampleFetch(invalid = false) {
 }
 
 function exampleLoader(fetch = exampleFetch()) {
-  return () => bootstrapConfiguration({ baseUrl: 'http://localhost:5173/example-content', development: true, fetch })
+  return () => bootstrapApplication({ baseUrl: 'http://localhost:5173/example-content', development: true, fetch })
 }
 
-afterEach(() => { cleanup(); vi.unstubAllGlobals() })
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.unstubAllEnvs() })
 
 describe('Interfaz de arranque', () => {
   it('muestra un indicador discreto durante la carga', () => {
@@ -44,7 +44,7 @@ describe('Interfaz de arranque', () => {
     await waitFor(() => expect(document.title).toBe(exampleName))
     expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toContain('Un espacio ficticio')
     expect(document.documentElement.lang).toBe('es')
-    expect(screen.getByRole('textbox', { name: 'Comando' }).hasAttribute('readonly')).toBe(true)
+    expect(screen.getByRole('textbox', { name: 'Comando' }).hasAttribute('readonly')).toBe(false)
   })
 
   it('muestra error ante una configuración inválida y reintenta desde el bootstrap', async () => {
@@ -87,4 +87,24 @@ describe('Interfaz de arranque', () => {
     await waitFor(() => expect(screen.getByRole('heading', { name: exampleName })).toBeTruthy())
     expect(screen.queryByRole('alert')).toBeNull()
   })
+})
+
+
+it('conecta el arranque real de Vite con el prompt y el ejecutor sin recargar la configuración', async () => {
+  vi.stubEnv('VITE_CONTENT_BASE_URL', 'https://example.com/content/')
+  const fetch = exampleFetch()
+  const json = fetch.getMockImplementation()!
+  fetch.mockImplementation(async (input) => String(input).endsWith('.md')
+    ? new Response('# Presentación desde el proveedor') : json(input))
+  vi.stubGlobal('fetch', fetch)
+  render(<App />)
+  const input = await screen.findByRole('textbox', { name: 'Comando' })
+  fireEvent.change(input, { target: { value: 'about' } })
+  fireEvent.keyDown(input, { key: 'Enter' })
+  expect(await screen.findByText('# Presentación desde el proveedor')).toBeTruthy()
+  fireEvent.change(input, { target: { value: 'about' } })
+  fireEvent.keyDown(input, { key: 'Enter' })
+  await waitFor(() => expect(screen.getAllByText('# Presentación desde el proveedor')).toHaveLength(2))
+  expect(fetch).toHaveBeenCalledTimes(4)
+  vi.unstubAllEnvs()
 })

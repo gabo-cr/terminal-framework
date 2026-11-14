@@ -1,14 +1,15 @@
 import { TerminalOutput } from './TerminalOutput'
 import type { TerminalEntryData } from './types'
 
-export function TerminalEntry({ entry }: { entry: TerminalEntryData }) {
+export function TerminalEntry({ entry, pendingLabel }: { entry: TerminalEntryData; pendingLabel: string }) {
   return (
-    <li className="space-y-3 py-5 first:pt-0">
+    <li data-status={entry.status} className="space-y-3 py-5 first:pt-0">
       <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">
         <span aria-hidden="true" className="mr-3 select-none">$</span>{entry.command}
       </p>
       <div className="space-y-2">
-        {entry.outputs.map((text, index) => <TerminalOutput key={index} text={text} />)}
+        {entry.status === 'pending' && <p role="status" className="text-zinc-400">{pendingLabel}</p>}
+        {entry.results.map((result, index) => <TerminalOutput key={index} result={result} />)}
       </div>
     </li>
   )

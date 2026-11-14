@@ -1,16 +1,20 @@
 import { useEffect } from 'react'
-import type { Configuration } from '../configuration/ConfigurationLoader'
-import { loadConfiguration } from './loadConfiguration'
+import type { bootstrapApplication } from './bootstrapApplication'
+import { useTerminal } from '../terminal/useTerminal'
+import { loadApplication } from './loadApplication'
 import { useConfiguration } from './useConfiguration'
 import { Terminal } from '../terminal/Terminal'
 
 const messages = {
-  es: { loading: 'Cargando…', error: 'No pudimos cargar el sitio.', detail: 'Comprueba tu conexión e inténtalo de nuevo. Si el problema continúa, la configuración del sitio puede necesitar una revisión.', retry: 'Reintentar', history: 'Ejecuciones anteriores', input: 'Comando' },
-  en: { loading: 'Loading…', error: 'We could not load this site.', detail: 'Check your connection and try again. If the problem continues, the site configuration may need attention.', retry: 'Try again', history: 'Previous executions', input: 'Command' },
+  es: { loading: 'Cargando…', error: 'No pudimos cargar el sitio.', detail: 'Comprueba tu conexión e inténtalo de nuevo. Si el problema continúa, la configuración del sitio puede necesitar una revisión.', retry: 'Reintentar', history: 'Ejecuciones anteriores', input: 'Comando', pending: 'Ejecutando…' },
+  en: { loading: 'Loading…', error: 'We could not load this site.', detail: 'Check your connection and try again. If the problem continues, the site configuration may need attention.', retry: 'Try again', history: 'Previous executions', input: 'Command', pending: 'Running…' },
 }
 
-function SitePage({ configuration }: { configuration: Configuration }) {
-  const { site } = configuration
+type Application = Awaited<ReturnType<typeof bootstrapApplication>>
+
+function SitePage({ application }: { application: Application }) {
+  const { site } = application.configuration
+  const terminal = useTerminal(application.executor, site.locale)
   useEffect(() => {
     document.title = site.name
     document.documentElement.lang = site.locale
@@ -34,13 +38,18 @@ function SitePage({ configuration }: { configuration: Configuration }) {
         welcome={site.terminal.welcome}
         theme={site.theme}
         labels={messages[site.locale]}
+        entries={terminal.entries}
+        promptValue={terminal.input}
+        onInputChange={terminal.setInput}
+        onSubmit={() => { void terminal.submit() }}
+        pending={terminal.pending}
       />
     </div>
   )
 }
 
-export function App({ load = loadConfiguration, initialLocale = 'es' }: {
-  load?: () => Promise<Configuration>
+export function App({ load = loadApplication, initialLocale = 'es' }: {
+  load?: () => Promise<Application>
   initialLocale?: 'es' | 'en'
 }) {
   const { state, retry } = useConfiguration(load)
@@ -58,7 +67,7 @@ export function App({ load = loadConfiguration, initialLocale = 'es' }: {
           <button type="button" onClick={retry} className="mt-6 rounded-md bg-zinc-900 px-5 py-3 text-sm font-medium text-white hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-900">{text.retry}</button>
         </div>
       )}
-      {state.status === 'ready' && <SitePage configuration={state.configuration} />}
+      {state.status === 'ready' && <SitePage application={state.configuration} />}
     </main>
   )
 }

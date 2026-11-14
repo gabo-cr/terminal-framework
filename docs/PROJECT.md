@@ -256,8 +256,8 @@ reutilizarlos durante la sesión. `bootstrapApplication(options)` combina la car
 y validación estricta con esa composición, devolviendo
 `{ configuration, content, executor }`. El arranque no descarga Markdown.
 
-El bootstrap de configuración existente conserva su contrato; la UI de presentación
-continúa usándolo hasta que se añada la terminal interactiva. Los consumidores del
+El bootstrap de configuración existente conserva su contrato; la terminal utiliza
+el arranque integrado mediante loadApplication. Los consumidores del
 motor ya pueden usar el arranque integrado sin depender de React o Vite. No hay
 singleton global: cada nuevo arranque tiene su propia instancia y caché.
 
@@ -275,26 +275,39 @@ cargar Markdown y `clear` sin vaciar la caché ni el historial. Las pruebas nuev
 de `tests/app/contents.integration.test.ts` usan los componentes reales con `fetch`
 simulado en ambos idiomas y conservan todas las pruebas anteriores.
 
-## Incremento 4: estructura visual de terminal
+## Incremento 4: terminal e interacción básica
 
-`src/terminal` contiene `Terminal`, `TerminalHistory`, `TerminalEntry`,
-`TerminalOutput` y `TerminalPrompt`. Reciben props de presentación tipadas sin
-importar Core, Configuration ni Content. `TerminalEntryData` describe únicamente
-un ID, el texto del comando y un arreglo de resultados de texto; no modifica los
-contratos del motor.
+`src/terminal` contiene los componentes visuales y `useTerminal`. La página se
+inicializa mediante `loadApplication` y conserva el servicio y ejecutor creados
+por el bootstrap. `useConfiguration` admite el resultado tipado del arranque
+completo y conserva sus estados de carga, error y reintento.
 
-La página conserva el título, descripción, fondo blanco, estados de carga y error,
-reintento y metadatos. Al completar la configuración muestra el panel centrado,
-con fondo y acento provenientes de `site.theme`, cabecera con tres círculos
-decorativos y título «terminal», bienvenida configurable y prompt de solo lectura.
-Los resultados son texto claro; los comandos y el prompt heredan el acento. Las
-ejecuciones usan separadores, espacios en blanco preservados y ajuste de palabras
-largas para pantallas pequeñas. Las etiquetas accesibles se reciben en es/en.
+El prompt es una entrada controlada. Enter acepta una instrucción no vacía,
+conserva su texto original y vacía el campo. No se envía Enter durante composición
+IME ni eventos repetidos. El hook ignora espacios vacíos sin interpretar sintaxis;
+el parser y el registro siguen siendo responsabilidad exclusiva del ejecutor.
 
-La aplicación no incluye muestras de historial. Las ejecuciones ficticias existen
-solo en `tests/terminal/Terminal.test.tsx` para comprobar composición, orden,
-separadores y salida como texto seguro. Todavía no hay edición de instrucciones,
-envío, conexión con CommandExecutor, descarga o renderizado Markdown.
+`useTerminal` posee dos historiales: `commandHistory` incluye todas las
+instrucciones aceptadas (también fallidas y clear); `entries` conserva la salida
+visual con ID, comando original, resultados del Core y estado `pending`, `success`
+o `error`. El ejecutor recibe una copia del historial anterior antes de registrar
+la instrucción actual, de modo que history la incluye exactamente una vez.
+
+Una referencia bloquea sincrónicamente los envíos mientras hay una ejecución
+pendiente. El prompt queda de solo lectura y la entrada pendiente muestra un
+indicador localizado. Los resultados de error no rompen la sesión; un rechazo
+inesperado se muestra como error recuperable con causa de depuración sin exponerla
+en pantalla. Los resultados tardíos tras desmontar la sesión no actualizan React.
+
+El resultado `{ type: 'clear' }` vacía únicamente `entries`: no deja una ejecución
+de clear visible ni borra comandos, bienvenida o caché. El hook no conoce HTTP,
+no modifica el comportamiento del Core y no conserva otro historial en el motor.
+
+`TerminalOutput` presenta los tipos existentes: texto, Markdown original como
+texto seguro, ayuda, listados, historial y errores. Clear se aplica en el
+controlador. No se interpreta HTML ni se incorpora una biblioteca Markdown.
+Los colores, bienvenida, metadatos y estados de inicialización siguen configurados
+por el sitio. No hay muestras de contenido personal en producción.
 
 ## Forma de trabajo
 

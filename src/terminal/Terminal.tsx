@@ -9,10 +9,13 @@ export interface TerminalProps {
   theme: TerminalTheme
   entries?: readonly TerminalEntryData[]
   promptValue?: string
-  labels: { history: string; input: string }
+  onInputChange?: (value: string) => void
+  onSubmit?: () => void
+  pending?: boolean
+  labels: { history: string; input: string; pending?: string }
 }
 
-export function Terminal({ welcome, theme, entries = [], promptValue, labels }: TerminalProps) {
+export function Terminal({ welcome, theme, entries = [], promptValue, labels, onInputChange, onSubmit, pending }: TerminalProps) {
   const titleId = useId()
   return (
     <section aria-labelledby={titleId} className="mx-auto w-full min-w-0 max-w-3xl overflow-hidden rounded-xl border border-black/10 shadow-lg shadow-black/10" style={{ backgroundColor: theme.terminalBackground, color: theme.accentColor }}>
@@ -25,9 +28,9 @@ export function Terminal({ welcome, theme, entries = [], promptValue, labels }: 
         <h2 id={titleId} className="font-mono text-xs tracking-wide text-zinc-400">terminal</h2>
       </header>
       <div className="min-h-64 px-5 pb-6 pt-6 font-mono text-sm leading-7 sm:min-h-80 sm:px-7 sm:pb-8 sm:text-base">
-        <TerminalOutput text={welcome} />
-        <TerminalHistory entries={entries} label={labels.history} />
-        <TerminalPrompt label={labels.input} value={promptValue} />
+        <TerminalOutput result={{ type: 'text', text: welcome }} />
+        <TerminalHistory entries={entries} label={labels.history} pendingLabel={labels.pending ?? '…'} />
+        <TerminalPrompt label={labels.input} value={promptValue} onChange={onInputChange} onSubmit={onSubmit} pending={pending} />
       </div>
     </section>
   )
