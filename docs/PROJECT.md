@@ -161,7 +161,7 @@ El listado no añade la introducción automáticamente. Se permiten documentos c
 
 Usa mapas por ID y conjuntos de pertenencia: documento, introducción y pertenencia se consultan en O(1); obtener una colección o listar sus documentos requiere O(n) para copiar el arreglo correspondiente. El constructor toma una copia del catálogo y las consultas devuelven copias, para impedir que cambios externos desincronicen los índices o alteren el orden. No expone operaciones de escritura.
 
-`ContentService` conserva su contrato. El catálogo implementa su parte síncrona (`getDocument` y `getCollection`); un servicio futuro podrá componer estas consultas con `getMarkdown`. Esta tarea solo verifica esa composición con un cuerpo simulado en pruebas y no conecta un servicio real al arranque ni modifica el motor.
+`ContentService` conserva su contrato. El catálogo implementa su parte síncrona (`getDocument` y `getCollection`); createContentService compone estas consultas con el proveedor HTTP y ContentCache sin modificar el motor.
 
 ### MarkdownContentProvider
 
@@ -200,8 +200,7 @@ capa de contenidos; el motor sigue produciendo sus mensajes localizados y puede
 conservar el error del proveedor como causa de `CONTENT_ERROR`.
 
 El proveedor implementa la parte `getMarkdown` de `ContentService`, complementaria
-al catálogo. No se conecta todavía a React ni al arranque y no incorpora renderizado
-Markdown, caché ni persistencia.
+al catálogo. Se compone mediante createContentService y el arranque integrado bootstrapApplication. No incorpora renderizado Markdown, caché propia ni persistencia.
 
 ### ContentCache
 
@@ -238,7 +237,40 @@ const contentService: ContentService = {
 En desarrollo HTTP local se pasa además `development: true` al proveedor, según
 las reglas existentes. La caché no conoce comandos, React, rutas ni solicitudes
 HTTP; no incorpora expiración, límites de tamaño ni almacenamiento persistente.
-Esta tarea no conecta el servicio a la UI ni modifica el motor de comandos.
+El servicio se conecta al ejecutor en la capa app mediante inyección; la UI de terminal queda pendiente.
+
+### Integración con el motor
+
+`createContentService(configuration.content, options)` crea un catálogo, un proveedor
+HTTP y una caché, y devuelve `CachedContentService`. Mantiene las tres operaciones
+de `ContentService` y añade `clearCache()` únicamente como operación interna. No
+se recrea ninguno de esos componentes dentro de una consulta o ejecución.
+
+`createCommandRuntime(configuration, options)` recibe la configuración validada y
+la raíz de contenidos, crea el servicio y un registro, e inyecta ambos junto con
+`site.locale` en un único `CommandExecutor`. Devuelve `{ content, executor }` para
+reutilizarlos durante la sesión. `bootstrapApplication(options)` combina la carga
+y validación estricta con esa composición, devolviendo
+`{ configuration, content, executor }`. El arranque no descarga Markdown.
+
+El bootstrap de configuración existente conserva su contrato; la UI de presentación
+continúa usándolo hasta que se añada la terminal interactiva. Los consumidores del
+motor ya pueden usar el arranque integrado sin depender de React o Vite. No hay
+singleton global: cada nuevo arranque tiene su propia instancia y caché.
+
+Los fallos HTTP y de red llegan al ejecutor como `ContentError`, se convierten en
+el resultado recuperable `CONTENT_ERROR` con mensaje localizado y conservan el
+diagnóstico en `cause`. El rechazo se elimina de la caché para permitir reejecutar
+el comando. Un archivo inexistente en el servidor produce HTTP 404 recuperable;
+las referencias inexistentes en el catálogo se rechazan durante el bootstrap.
+La consulta directa del servicio a un ID ausente sigue rechazando con
+`DOCUMENT_NOT_FOUND` antes de acceder a la red.
+
+Se mantienen los comportamientos y resultados del Incremento 2, incluidas la
+introducción como documento accesible, la sugerencia canónica, los listados sin
+cargar Markdown y `clear` sin vaciar la caché ni el historial. Las pruebas nuevas
+de `app/contents.integration.test.ts` usan los componentes reales con `fetch`
+simulado en ambos idiomas y conservan todas las pruebas anteriores.
 
 ## Forma de trabajo
 

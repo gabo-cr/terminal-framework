@@ -85,7 +85,7 @@ contexto, para no duplicarla en `history`.
 Las dos consultas de catálogo son síncronas. La carga del cuerpo es asíncrona.
 El ejecutor rechaza IDs ajenos antes de consultar el documento. Si un listado falla,
 no se devuelve un listado parcial; si falla la introducción, tampoco se devuelve
-su sugerencia. No hay implementación HTTP o caché de Markdown en este incremento.
+su sugerencia. En el Incremento 3, createContentService implementa este contrato mediante catálogo, proveedor HTTP y caché, inyectados desde app. El Core sigue sin conocer el transporte.
 
 ## Resultados y errores
 
@@ -144,7 +144,30 @@ directo. Se sustituyó la integración anterior limitada a una colección por un
 suite de sesiones completas. Se eliminó la búsqueda duplicada del comando ausente
 mediante la función de error compartida. No se añadieron comportamientos nuevos.
 
-Pendientes para próximos incrementos: servicio HTTP de Markdown y caché de sesión,
-renderizado seguro, entrada y salida de terminal, y coordinación del historial en
+Pendientes para próximos incrementos: renderizado seguro, entrada y salida de
+terminal, y coordinación del historial en
 la capa consumidora. La UI existente todavía no utiliza el motor. No se detectaron
 defectos funcionales pendientes dentro del alcance revisado.
+
+## Arranque integrado con contenidos reales
+
+```ts
+const { configuration, content, executor } = await bootstrapApplication({
+  baseUrl: contentBaseUrl,
+  fetch: fetchImplementation, // opcional; por defecto usa Fetch del entorno
+  development: false,
+})
+const results = await executor.execute('help', { history: [] })
+// Reutilizar executor y content en todas las instrucciones de esta sesión.
+```
+
+La función de app valida los tres JSON y crea los componentes una sola vez.
+`createCommandRuntime` permite la misma composición cuando la configuración ya
+está validada. `content.clearCache()` es una operación interna independiente del
+comando visual `clear`. No cambia el contrato de resultados del motor ni convierte
+Markdown a HTML.
+
+`app/contents.integration.test.ts` verifica el trayecto completo con catálogo,
+proveedor HTTP y caché reales y respuestas Fetch simuladas: documentos, colecciones,
+alias, internos, mensajes es/en, errores recuperables, reintentos, aislamiento de
+sesiones y solicitudes simultáneas. La suite del Incremento 2 se conserva.
