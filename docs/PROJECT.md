@@ -397,6 +397,12 @@ comprobando que clear conserva la bienvenida y el historial de comandos.
 
 ## Forma de trabajo
 
+La preparación de GitHub Pages está documentada en [DEPLOYMENT.md](DEPLOYMENT.md).
+Vite utiliza `VITE_BASE_PATH` (predeterminado `/terminal-framework/`, `/` para
+dominio personalizado). La raíz externa sigue siendo `VITE_CONTENT_BASE_URL`.
+El workflow manual verifica instalación, tipos, pruebas y build antes de publicar
+solo `dist`; preparar estos archivos no ejecuta una publicación.
+
 - Usar pnpm como gestor de paquetes, con versión fijada en `package.json` y `pnpm-lock.yaml` como único lockfile.
 - Avanzar mediante incrementos pequeños, verificables y limitados al alcance acordado.
 - Ejecutar las pruebas pertinentes en cada cambio de implementación y comunicar sus resultados; si no pueden ejecutarse, indicar el motivo.

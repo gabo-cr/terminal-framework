@@ -73,4 +73,11 @@ pnpm run preview
 
 Vitest ejecuta las pruebas una vez con `pnpm run test`. Para modo interactivo usa
 `pnpm run test --watch`. El build estático se genera en `dist/` con rutas de
-assets relativas, compatibles con publicación en un subdirectorio de GitHub Pages.
+assets bajo `/terminal-framework/` por defecto. `VITE_BASE_PATH=/` permite publicar
+en la raíz de un dominio personalizado.
+
+## GitHub Pages
+
+Consulta [la guía de despliegue](docs/DEPLOYMENT.md) para configurar las variables
+públicas, el repositorio externo y Settings → Pages. El workflow de publicación
+se activa manualmente y publica exclusivamente `dist` después de las comprobaciones.
