@@ -15,3 +15,7 @@
 - Evita complejidad prematura: no añadas funcionalidades fuera de alcance, dependencias innecesarias, módulos vacíos ni abstracciones especulativas.
 - Conserva los cambios existentes del usuario. Documenta las decisiones asumidas y actualiza el contexto cuando se aprueben cambios de alcance o arquitectura.
 - En la tarea documental inicial no crees la aplicación ni instales dependencias. El scaffolding y la instalación corresponden a una tarea posterior de implementación.
+
+- El repositorio no acepta ni revisa contribuciones externas o pull requests. `CONTRIBUTING.md` documenta esta política y el uso de copias y forks independientes. Para mantenimiento autorizado por el titular, consulta las guías `docs/development.md` y `docs/deployment.md`. Las restricciones de incrementos anteriores describen su alcance histórico; consulta el estado integrado en `docs/PROJECT.md` y limita cada tarea a lo solicitado.
+- Respeta los contratos públicos de `docs/configuration.md`, `docs/commands.md` y `docs/content.md`; no cambies contratos ni arquitectura de forma incidental. Conserva el Core independiente de React, DOM, HTTP y almacenamiento.
+- El framework se distribuye bajo MIT en `LICENSE`, con el aviso confirmado `Copyright (c) 2026 Gabriel Chávez Riera`. Conserva el aviso; la licencia de los contenidos personales es una decisión separada.

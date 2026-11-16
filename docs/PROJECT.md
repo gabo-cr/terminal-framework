@@ -420,3 +420,13 @@ Los comandos usan una variante más luminosa del acento configurado; los nombres
 en help usan una variante más apagada y seminegrita. El historial y los bloques
 de código tienen scrollbar delgado con acento de comandos y bordes redondeados
 cuando el navegador admite su personalización.
+
+## Política de mantenimiento y reutilización
+
+El repositorio es de mantenimiento personal y no acepta ni revisa contribuciones
+externas, incluidas pull requests de código o documentación. Se permite desarrollar
+copias y forks independientes, sin obligación de devolver cambios al original.
+El framework se distribuye bajo [MIT](../LICENSE), con el aviso confirmado
+`Copyright (c) 2026 Gabriel Chávez Riera`. Los contenidos
+personales tienen una decisión de licencia separada. La política se detalla en
+[CONTRIBUTING.md](../CONTRIBUTING.md).
