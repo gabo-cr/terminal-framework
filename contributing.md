@@ -6,7 +6,7 @@ terminal-framework es un proyecto de mantenimiento personal. **No se aceptan ni 
 
 El objetivo es que puedas descargar, clonar o hacer un fork del código y adaptarlo por tu cuenta. No necesitas devolver tus cambios al repositorio original ni solicitar su revisión. Las modificaciones de tu copia se mantienen bajo tu responsabilidad, sin compromiso de revisión o soporte por parte del titular del proyecto.
 
-Para preparar tu copia, consulta [desarrollo local](docs/development.md); para publicarla, consulta [despliegue](docs/deployment.md). La arquitectura y los contratos existentes están en [PROJECT.md](docs/PROJECT.md), [configuration.md](docs/configuration.md), [commands.md](docs/commands.md) y [content.md](docs/content.md). Estas guías describen cómo funciona el framework original, sin exigir que un fork solicite aprobación para cambiarlo.
+Para preparar tu copia, consulta [desarrollo local](docs/development.md); para publicarla, consulta [despliegue](docs/deployment.md). La arquitectura y los contratos existentes están en [project.md](docs/project.md), [configuration.md](docs/configuration.md), [commands.md](docs/commands.md) y [content.md](docs/content.md). Estas guías describen cómo funciona el framework original, sin exigir que un fork solicite aprobación para cambiarlo.
 
 ## Licencia
 

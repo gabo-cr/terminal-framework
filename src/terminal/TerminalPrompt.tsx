@@ -12,7 +12,7 @@ export function TerminalPrompt({ label, value = '', onChange, onSubmit, pending 
     <div className="text-[var(--terminal-command)] mt-3 flex min-w-0 shrink-0 items-center gap-2 border-t border-white/10 pt-3">
       <span aria-hidden="true" className="select-none">$</span>
       <input
-        ref={input} onBlur={() => { queueMicrotask(() => input.current?.focus({ preventScroll: true })) }}
+        ref={input}
         type="text" name="terminal-command" aria-label={label} value={value} readOnly={!onChange || pending} aria-busy={pending}
         onChange={(event) => onChange?.(event.target.value)}
         onKeyDown={(event) => {

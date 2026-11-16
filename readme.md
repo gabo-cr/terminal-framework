@@ -74,7 +74,7 @@ pnpm run dev
 
 Abre la dirección que indique Vite, con la ruta `/terminal-framework/`, y escribe `help` en la terminal del sitio.
 
-El sitio de prueba está en `tests/fixtures/external-site`. Incluye un documento ausente de forma intencional para comprobar cómo se presenta un error de descarga. Puedes consultar sus detalles en [la guía del sitio de prueba](tests/fixtures/external-site/README.md).
+El sitio de prueba está en `tests/fixtures/external-site`. Incluye un documento ausente de forma intencional para comprobar cómo se presenta un error de descarga. Puedes consultar sus detalles en [la guía del sitio de prueba](tests/fixtures/external-site/readme.md).
 
 ## Conectar tus propios contenidos
 
@@ -110,7 +110,7 @@ JSON es un formato de texto que permite describir datos de manera estructurada. 
 
 Los tres requieren `version: 1`. Una colección reúne una introducción y una lista ordenada de documentos. Los textos se escriben en archivos Markdown independientes y se conectan al catálogo por sus identificadores.
 
-Puedes revisar [los JSON del sitio de prueba](tests/fixtures/external-site/config) para ver ejemplos completos y [los contratos de configuración](docs/PROJECT.md#contratos-de-configuración) para conocer los campos y reglas exactos.
+Puedes revisar [los JSON del sitio de prueba](tests/fixtures/external-site/config) para ver ejemplos completos y [los contratos de configuración](docs/project.md#contratos-de-configuración) para conocer los campos y reglas exactos.
 
 ## Comandos de la terminal
 
@@ -183,22 +183,20 @@ El repositorio incluye un workflow manual para GitHub Pages. Preparar el build o
 - [Comandos: commands.json](docs/commands.md).
 - [Catálogo de contenidos: content.json](docs/content.md).
 
-- [Visión, arquitectura y configuración](docs/PROJECT.md).
-- [Motor de comandos y contrato de integración](docs/CORE.md).
-- [Sistema de contenidos y verificación del Incremento 3](docs/INCREMENT-3.md).
-- [Terminal interactiva y verificación del Incremento 4](docs/INCREMENT-4.md).
+- [Visión, arquitectura y configuración](docs/project.md).
+- [Motor de comandos y contrato de integración](docs/core.md).
 - [Publicación en GitHub Pages y dominio personalizado](docs/deployment.md).
-- [Sitio externo de prueba](tests/fixtures/external-site/README.md).
+- [Sitio externo de prueba](tests/fixtures/external-site/readme.md).
 
 ## Uso del código y forks
 
 Este es un proyecto de mantenimiento personal: **no se aceptan ni se revisan contribuciones externas o pull requests**. Puedes descargar, clonar o hacer un fork del código para adaptarlo y mantener tu propia versión, sin obligación de aportar tus cambios al repositorio original.
 
-Consulta [la política de uso y contribuciones](CONTRIBUTING.md). El framework se distribuye bajo la [licencia MIT](LICENSE), con copyright de Gabriel Chávez Riera (2026). La licencia de los contenidos personales es independiente.
+Consulta [la política de uso y contribuciones](contributing.md). El framework se distribuye bajo la [licencia MIT](LICENSE), con copyright de Gabriel Chávez Riera (2026). La licencia de los contenidos personales es independiente.
 
 ## Estado y próximos pasos
 
-El proyecto está en desarrollo, con versión `0.0.0` en `package.json`. La terminal interactiva, el motor de comandos y la lectura de contenidos externos ya están implementados. El Incremento 6 comienza la documentación y la preparación para compartir el proyecto como open source.
+El proyecto está en desarrollo, con versión `0.1.0` en `package.json`. La terminal interactiva, el motor de comandos y la lectura de contenidos externos ya están implementados. Esta primera versión pública del MVP incluye la documentación de configuración, desarrollo y despliegue. No se presenta como una versión 1.0 estable.
 
 Quedan por completar la demostración visual y una versión en inglés de este README. También están pendientes las comprobaciones con lectores de pantalla y dispositivos móviles físicos señaladas en la documentación, y la verificación remota del despliegue con los contenidos reales.
 

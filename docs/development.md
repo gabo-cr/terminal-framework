@@ -50,7 +50,7 @@ Sirve `tests/fixtures/external-site` en `http://127.0.0.1:4174/`, con CORS habil
 pnpm dev
 ```
 
-Abre la dirección indicada por Vite con la ruta `/terminal-framework/` y escribe `help`. Puedes probar `code list` y `code react-hooks` con el catálogo de prueba. Hay un Markdown ausente intencionalmente para comprobar errores; consulta [las fixtures](../tests/fixtures/external-site/README.md).
+Abre la dirección indicada por Vite con la ruta `/terminal-framework/` y escribe `help`. Puedes probar `code list` y `code react-hooks` con el catálogo de prueba. Hay un Markdown ausente intencionalmente para comprobar errores; consulta [las fixtures](../tests/fixtures/external-site/readme.md).
 
 Si utilizas contenidos externos públicos, no necesitas el servidor de fixtures. Las muestras se mantienen en `tests/`, no se publican dentro de `dist/`.
 
@@ -93,8 +93,33 @@ Para comprobar la base raíz, cambia `VITE_BASE_PATH=/` en `.env.local` y vuelve
 | `listen EPERM` en pruebas | El entorno bloquea servidores locales; ejecuta las pruebas HTTP donde se permitan puertos locales |
 | Funciona en dev, falla en preview | Sustituye HTTP local por una raíz HTTPS válida y vuelve a generar |
 
-## Discrepancia detectada en esta revisión
+## Reproducir la verificación integrada del MVP
 
-La suite completa registra dos fallos en `tests/app/App.http.test.tsx` (español e inglés): espera los usos de `help code` unidos con ` | `, mientras que la presentación actual los muestra en elementos separados dentro de dos columnas. La prueba conserva la expectativa del diseño anterior. Debe actualizarse esa expectativa en una tarea de pruebas de interfaz; esta tarea documental no modifica el renderer ni las pruebas existentes.
+Con Vite y el servidor de fixtures activos, prueba en `/terminal-framework/`:
 
-Con puertos locales habilitados, la revisión ejecutó 523 pruebas: 521 pasaron y esas dos fallaron. Las comprobaciones de tipos y el build pasaron. Por tanto, el workflow actual detendría la publicación en el paso de pruebas hasta resolver la discrepancia; no se ha modificado para omitirla.
+1. `help` y `help code`: comandos y usos en una columna, descripción en otra.
+2. `about`, `code`, `code list`, `code react-hooks`, `read list` y `read cuento-001`: Markdown, introducciones y listados completos en el orden configurado.
+3. `unknown`, `code nonexistent`, `about extra` y `missing`: errores recuperables, sin perder la sesión. El archivo de missing no existe a propósito.
+4. `clear` y `history`: la salida se limpia sin borrar bienvenida, comandos ni caché. Usa ↑/↓ para recuperar instrucciones y volver al borrador.
+5. Tab/Shift+Tab: salir del input, enfocar enlaces, bloques de código y región de historial, y volver sin que la terminal robe el foco. El campo tiene foco inicial y lo conserva al ejecutar si no te trasladas a otro elemento.
+6. Leer un documento largo, desplazarse a una respuesta anterior y redimensionar: conservar la posición de lectura. Revisar tamaños de escritorio y móvil sin desbordamiento global.
+
+`tests/app/App.http.test.tsx` reproduce el recorrido con React, bootstrap, motor y HTTP real en español e inglés. `tests/app/contents.http.test.ts` comprueba además descarga, caché y recuperación tras publicar el archivo ausente en una copia temporal. `tests/terminal/accessibility.test.tsx` verifica la conservación de foco en otros controles y decisiones de scroll con geometría simulada; jsdom no sustituye pruebas de teclado en un navegador.
+
+### Probar otra configuración
+
+Las muestras `ui-site` y `external-site` representan catálogos ficticios distintos. El servidor manual usa external-site. Para servir ui-site temporalmente en otro puerto desde una terminal:
+
+```sh
+pnpm exec node --experimental-strip-types --input-type=module -e "import('./tests/support/serve-fixtures.ts').then(({ createFixtureServer }) => createFixtureServer('./tests/fixtures/ui-site').listen(4175, '127.0.0.1'))"
+```
+
+Este comando usa la eliminación de tipos de Node. Cambia temporalmente `VITE_CONTENT_BASE_URL` de `.env.local` a `http://127.0.0.1:4175/` y reinicia Vite. Prueba `about`, `essays`, `essays list` y `essays first-essay`. Restablece la raíz anterior al terminar. Los dos sitios reutilizan la misma aplicación sin cambiar código de producción.
+
+La versión 0.1.0 conserva pendientes las comprobaciones con lectores de pantalla, teléfonos físicos y Pages real. Estas verificaciones no se afirman como completadas por ejecutar pruebas locales.
+
+## Verificación de 0.1.0
+
+El 16 de noviembre de 2026 se comprobaron la instalación con lockfile congelado, las comprobaciones de tipos de aplicación y Core, las **527 pruebas en 25 archivos** y la compilación de producción. La integración HTTP verifica tanto external-site (español e inglés) como ui-site, sin modificar la aplicación para cambiar de catálogo. Las pruebas de foco verifican que enlaces, bloques de código, historial y botones conservan el foco incluso al terminar un comando.
+
+Esta verificación local no implica publicación en Pages ni pruebas en dispositivos físicos. La discrepancia anterior de las expectativas de help quedó corregida en las pruebas: ahora verifican los usos separados y la descripción sin exigir el formato antiguo con barras verticales.

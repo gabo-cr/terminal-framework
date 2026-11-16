@@ -11,7 +11,7 @@ solo en una copia temporal de las fixtures.
 `code react-hooks` incluye un documento largo, una línea de código ancha, texto
 sin espacios y enlaces seguros/bloqueados para revisar diseño adaptable, teclado
 y desplazamiento. Se reutiliza en las pruebas HTTP y en la revisión manual del
-[Incremento 4](../../../docs/INCREMENT-4.md); no es contenido de producción.
+[guía de desarrollo](../../../docs/development.md); no es contenido de producción.
 
-Consulta [el informe del Incremento 3](../../../docs/INCREMENT-3.md) para reproducir la
+Consulta [la guía de desarrollo](../../../docs/development.md) para reproducir la
 verificación de todos los comandos, incluidos los listados, caché y recuperación.

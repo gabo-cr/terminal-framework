@@ -43,7 +43,12 @@ it.each(['es', 'en'] as const)('integra React, arranque, motor y contenidos HTTP
     }
 
     expect((await execute('help')).textContent).toContain(locale === 'es' ? 'Comandos disponibles' : 'Available commands')
-    expect((await execute('help code')).textContent).toContain(`code | code list | code <${locale === 'es' ? 'documento' : 'document'}>`)
+    const help = await execute('help code')
+    expect(within(help).getByRole('term').querySelector('span')?.textContent).toBe('code')
+    expect(Array.from(within(help).getByRole('term').querySelectorAll('code'), (usage) => usage.textContent)).toEqual([
+      'code', 'code list', `code <${locale === 'es' ? 'documento' : 'document'}>`,
+    ])
+    expect(within(help).getByRole('definition').textContent).toBe('Taller')
     for (const [command, heading] of [
       ['about', 'Presentación'], ['contact', 'Contacto'], ['code', 'Taller'],
       ['code react-hooks', 'React Hooks'], ['read', 'Biblioteca'], ['read cuento-001', 'La puerta azul'],
@@ -89,5 +94,42 @@ it.each(['es', 'en'] as const)('integra React, arranque, motor y contenidos HTTP
     server.closeAllConnections()
     await new Promise<void>((resolve) => server.close(() => resolve()))
     await rm(directory, { recursive: true, force: true })
+  }
+})
+
+it('ejecuta una segunda configuración independiente con React y contenidos HTTP reales', async () => {
+  const server = createFixtureServer(join(fixtureDirectory, '../ui-site'))
+  try {
+    const listening = once(server, 'listening')
+    server.listen(0, '127.0.0.1')
+    await listening
+    const address = server.address()
+    if (!address || typeof address === 'string') throw new Error('No HTTP address')
+    vi.stubEnv('VITE_CONTENT_BASE_URL', `http://127.0.0.1:${address.port}/`)
+    vi.stubEnv('DEV', true)
+    render(<StrictMode><App /></StrictMode>)
+    const input = await screen.findByRole('textbox', { name: 'Comando' })
+    expect(screen.getByRole('heading', { name: 'Cuaderno de ejemplo' })).toBeTruthy()
+    async function execute(command: string) {
+      fireEvent.change(input, { target: { value: command } })
+      fireEvent.keyDown(input, { key: 'Enter' })
+      await waitFor(() => expect(input.getAttribute('aria-busy')).toBe('false'))
+      return screen.getByRole('region', { name: 'Ejecuciones anteriores' }).querySelector('[data-terminal-entry]:last-child') as HTMLElement
+    }
+    expect(within(await execute('acerca')).getByRole('heading', { name: 'El cuaderno' })).toBeTruthy()
+    expect(within(await execute('essays')).getByRole('heading', { name: 'El cuaderno' })).toBeTruthy()
+    expect(within(await execute('essays list')).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'first-essay — Una máquina y un poema',
+    ])
+    expect(within(await execute('essays first-essay')).getByRole('heading', { name: 'Una máquina y un poema' })).toBeTruthy()
+    const help = await execute('help')
+    expect(within(help).getAllByRole('term').map((term) => term.querySelector('span')?.textContent)).toEqual([
+      'help', 'clear', 'history', 'about', 'essays',
+    ])
+    expect(document.activeElement).toBe(input)
+  } finally {
+    cleanup()
+    server.closeAllConnections()
+    await new Promise<void>((resolve) => server.close(() => resolve()))
   }
 })

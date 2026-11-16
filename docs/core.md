@@ -1,4 +1,4 @@
-# Motor de comandos — Incremento 2
+# Motor de comandos
 
 El motor recibe instrucciones de texto y produce datos. No renderiza UI, navega,
 realiza HTTP ni conserva historial. Las configuraciones y el catálogo deben haber
@@ -70,7 +70,7 @@ async function submit(input: string) {
 ```
 
 El ejemplo registra también instrucciones fallidas. El motor no decide la política
-de persistencia ni coordina envíos simultáneos. La futura capa de sesión deberá
+de persistencia ni coordina envíos simultáneos. La capa de sesión debe
 mantener el orden de envío y evitar añadir la instrucción actual antes de pasar el
 contexto, para no duplicarla en `history`.
 
@@ -138,16 +138,8 @@ pnpm run build
 ni tipos ambientales de Vite. La revisión estática de imports complementa esta
 comprobación. No existe un comando de lint configurado.
 
-La revisión final verificó los seis módulos de producción del Core, sus pruebas y
-el contrato de contenidos. No encontró referencias al sitio personal ni HTTP
-directo. Se sustituyó la integración anterior limitada a una colección por una
-suite de sesiones completas. Se eliminó la búsqueda duplicada del comando ausente
-mediante la función de error compartida. No se añadieron comportamientos nuevos.
-
-Pendientes para próximos incrementos: renderizado seguro, entrada y salida de
-terminal, y coordinación del historial en
-la capa consumidora. La UI existente todavía no utiliza el motor. No se detectaron
-defectos funcionales pendientes dentro del alcance revisado.
+La terminal React utiliza este motor a través de useTerminal, que conserva los
+historiales y coordina envíos. La presentación Markdown permanece en src/terminal.
 
 ## Arranque integrado con contenidos reales
 

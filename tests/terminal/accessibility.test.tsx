@@ -25,20 +25,38 @@ describe('foco del prompt', () => {
     expect(input.className).toContain('outline-none')
   })
 
-  it('recupera el foco sin desplazar la página cuando sale del input', async () => {
+  it.each(['enlace', 'código', 'historial', 'botón'])('respeta el foco en %s durante y después de la ejecución', async (target) => {
     const props = { label: 'Comando', value: '', onChange: vi.fn() }
-    const view = (pending: boolean) => <><a href="#info">Información</a><TerminalPrompt {...props} pending={pending} /></>
+    const view = (pending: boolean) => <>
+      <a href="#info">Información</a>
+      <pre tabIndex={0} aria-label="Código">const value = 1</pre>
+      <div role="region" tabIndex={0} aria-label="Historial" />
+      <button type="button">Acción</button>
+      <TerminalPrompt {...props} pending={pending} />
+    </>
     const { rerender } = render(view(false))
     const input = screen.getByRole('textbox')
     input.focus()
     rerender(view(true))
-    const link = screen.getByRole('link')
+    const destination = target === 'enlace' ? screen.getByRole('link')
+      : target === 'código' ? screen.getByLabelText('Código')
+        : target === 'historial' ? screen.getByRole('region') : screen.getByRole('button')
     const focus = vi.spyOn(input, 'focus')
-    link.focus()
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })
+    input.dispatchEvent(tab)
+    expect(tab.defaultPrevented).toBe(false)
+    // jsdom no implementa el avance de Tab: simular su destino nativo.
+    destination.focus()
     await new Promise<void>((resolve) => queueMicrotask(resolve))
+    expect(document.activeElement).toBe(destination)
     rerender(view(false))
+    expect(document.activeElement).toBe(destination)
+    expect(focus).not.toHaveBeenCalled()
+    const backwards = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true })
+    destination.dispatchEvent(backwards)
+    expect(backwards.defaultPrevented).toBe(false)
+    input.focus()
     expect(document.activeElement).toBe(input)
-    expect(focus).toHaveBeenCalledWith({ preventScroll: true })
   })
 
   it('ignora composición IME y no intercepta flechas modificadas', () => {
