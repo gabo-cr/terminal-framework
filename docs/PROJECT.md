@@ -333,14 +333,20 @@ el borrador guardado. Enviar una instrucción reinicia el cursor de navegación.
 Sin historial las flechas son inocuas; durante una ejecución no se navega.
 
 La entrada sigue en el orden natural del teclado, conserva su etiqueta accesible
-y muestra un contorno de foco. No recibe autofocus al montar. Durante la espera
-permanece montada y de solo lectura. Al finalizar se conserva el foco mediante
-`focus({ preventScroll: true })` únicamente si seguía en la entrada; si el visitante
-se trasladó a un enlace u otro elemento no se recupera el foco automáticamente.
+y, por decisión visual, no muestra contorno al enfocar el input; conserva el cursor
+y su etiqueta accesible. Recibe foco al montar y lo recupera al perderlo mediante
+`focus({ preventScroll: true })`, por decisión de interacción aprobada para mantener
+el cursor nativo activo en el prompt. Durante la espera permanece montada y de
+solo lectura. Esta política devuelve también el foco cuando se intenta enfocar
+otro elemento de la página.
 La composición IME, los eventos Enter repetidos y el bloqueo síncrono existente
 previenen envíos accidentales; las flechas con modificadores no se interceptan.
 
-La bienvenida y el historial están dentro de un viewport de altura limitada,
+La página ocupa la altura dinámica de la ventana (`100dvh`). La cabecera es
+compacta y la terminal ocupa el espacio restante; el input permanece al pie.
+El texto de terminal usa 13 px e interlineado de 20 px, con márgenes Markdown
+reducidos. El input móvil mantiene 16 px para evitar zoom al enfocarlo.
+La bienvenida y el historial están dentro de un viewport flexible de altura limitada,
 con desplazamiento propio, foco visible, etiqueta de región y navegación de
 teclado; el prompt queda fuera de esa zona desplazable. `useTerminalScroll`
 sigue las actualizaciones cuando el visitante estaba a 64 px o menos del final.
@@ -409,3 +415,8 @@ solo `dist`; preparar estos archivos no ejecuta una publicación.
 - Mantener separadas la lógica de dominio, la configuración, el acceso a contenidos y la presentación.
 - Evitar complejidad prematura, dependencias innecesarias y abstracciones sin un caso de uso actual.
 - Actualizar esta documentación cuando cambien las decisiones aprobadas. No convertir cuestiones pendientes en requisitos implícitos.
+
+Los comandos usan una variante más luminosa del acento configurado; los nombres
+en help usan una variante más apagada y seminegrita. El historial y los bloques
+de código tienen scrollbar delgado con acento de comandos y bordes redondeados
+cuando el navegador admite su personalización.

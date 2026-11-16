@@ -1,30 +1,47 @@
 @import "tailwindcss";
 
 @layer components {
+  .terminal-scrollbar,
+  .terminal-markdown pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--terminal-command, #ADE1B9) transparent;
+  }
+  :where(.terminal-scrollbar, .terminal-markdown pre)::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  :where(.terminal-scrollbar, .terminal-markdown pre)::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :where(.terminal-scrollbar, .terminal-markdown pre)::-webkit-scrollbar-thumb {
+    background: var(--terminal-command, #ADE1B9);
+    border-radius: 999px;
+  }
+
   .terminal-markdown {
-    @apply min-w-0 space-y-4 text-zinc-200 leading-7;
+    @apply min-w-0 space-y-2 text-zinc-200 leading-5;
     overflow-wrap: anywhere;
   }
-  .terminal-markdown h1 { @apply mt-8 mb-4 text-2xl font-semibold leading-tight text-zinc-100 sm:text-3xl; }
-  .terminal-markdown h2 { @apply mt-7 mb-3 text-xl font-semibold leading-snug text-zinc-100 sm:text-2xl; }
-  .terminal-markdown h3 { @apply mt-6 mb-2 text-lg font-semibold text-zinc-100; }
-  .terminal-markdown :where(h4, h5, h6) { @apply mt-5 mb-2 text-base font-semibold text-zinc-100; }
+  .terminal-markdown h1 { @apply mt-5 mb-2 text-xl font-semibold leading-tight text-zinc-100; }
+  .terminal-markdown h2 { @apply mt-4 mb-2 text-lg font-semibold leading-snug text-zinc-100; }
+  .terminal-markdown h3 { @apply mt-3 mb-1 text-base font-semibold text-zinc-100; }
+  .terminal-markdown :where(h4, h5, h6) { @apply mt-3 mb-1 text-sm font-semibold text-zinc-100; }
   .terminal-markdown > :first-child { @apply mt-0; }
-  .terminal-markdown p { @apply my-3; }
+  .terminal-markdown p { @apply my-2; }
   .terminal-markdown strong { @apply font-semibold text-zinc-100; }
   .terminal-markdown em { @apply italic; }
-  .terminal-markdown ul { @apply my-4 list-disc space-y-1 pl-6; }
-  .terminal-markdown ol { @apply my-4 list-decimal space-y-1 pl-6; }
+  .terminal-markdown ul { @apply my-2 list-disc space-y-1 pl-6; }
+  .terminal-markdown ol { @apply my-2 list-decimal space-y-1 pl-6; }
   .terminal-markdown li > :where(ul, ol) { @apply my-2; }
-  .terminal-markdown blockquote { @apply my-5 border-l-2 border-zinc-500 pl-4 text-zinc-300 italic; }
-  .terminal-markdown hr { @apply my-6 border-white/20; }
+  .terminal-markdown blockquote { @apply my-3 border-l-2 border-zinc-500 pl-4 text-zinc-300 italic; }
+  .terminal-markdown hr { @apply my-4 border-white/20; }
   .terminal-markdown a {
     @apply rounded-sm underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current;
     color: var(--terminal-accent, #96D9A5);
   }
-  .terminal-markdown :not(pre) > code { @apply rounded bg-black/20 px-1.5 py-0.5 font-mono text-sm text-zinc-100; }
+  .terminal-markdown :not(pre) > code { @apply rounded bg-black/20 px-1.5 py-0.5 font-mono text-xs text-zinc-100; }
   .terminal-markdown pre {
-    @apply my-5 max-w-full overflow-x-auto rounded-lg border border-white/10 bg-black/20 p-4 text-sm leading-6;
+    @apply my-3 max-w-full overflow-x-auto rounded-lg border border-white/10 bg-black/20 p-3 text-xs leading-5;
     white-space: pre;
     overflow-wrap: normal;
     word-break: normal;

@@ -5,21 +5,15 @@ export function TerminalPrompt({ label, value = '', onChange, onSubmit, pending 
   onHistoryPrevious?: () => void; onHistoryNext?: () => void
 }) {
   const input = useRef<HTMLInputElement>(null)
-  const wasPending = useRef(pending)
-  const restoreFocus = useRef(false)
   useEffect(() => {
-    if (pending && !wasPending.current) restoreFocus.current = document.activeElement === input.current
-    if (!pending && wasPending.current && restoreFocus.current && document.activeElement === input.current) {
-      input.current?.focus({ preventScroll: true })
-    }
-    wasPending.current = pending
-  }, [pending])
+    input.current?.focus({ preventScroll: true })
+  }, [])
   return (
-    <div className="mt-6 flex min-w-0 items-center gap-3 rounded-sm focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-current">
+    <div className="text-[var(--terminal-command)] mt-3 flex min-w-0 shrink-0 items-center gap-2 border-t border-white/10 pt-3">
       <span aria-hidden="true" className="select-none">$</span>
       <input
-        ref={input} onBlur={() => { restoreFocus.current = false }}
-        type="text" aria-label={label} value={value} readOnly={!onChange || pending} aria-busy={pending}
+        ref={input} onBlur={() => { queueMicrotask(() => input.current?.focus({ preventScroll: true })) }}
+        type="text" name="terminal-command" aria-label={label} value={value} readOnly={!onChange || pending} aria-busy={pending}
         onChange={(event) => onChange?.(event.target.value)}
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing) return
@@ -33,7 +27,7 @@ export function TerminalPrompt({ label, value = '', onChange, onSubmit, pending 
           }
         }}
         autoComplete="off" autoCapitalize="none" spellCheck={false}
-        className="min-w-0 flex-1 bg-transparent py-2 text-base text-inherit caret-current outline-none"
+        className="min-w-0 flex-1 bg-transparent py-1 text-base sm:text-[13px] text-inherit caret-current outline-none"
       />
     </div>
   )

@@ -28,11 +28,11 @@ function SitePage({ application }: { application: Application }) {
   }, [site])
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
-      <header className="mb-8 sm:mb-12">
-        <div aria-hidden="true" className="mb-6 h-1 w-10 rounded-full" style={{ backgroundColor: site.theme.accentColor }} />
-        <h1 className="text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-5xl">{site.name}</h1>
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 [overflow-wrap:anywhere] sm:text-lg">{site.description}</p>
+    <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col">
+      <header className="mb-5 shrink-0 sm:mb-6">
+        <div aria-hidden="true" className="mb-3 h-1 w-10 rounded-full" style={{ backgroundColor: site.theme.accentColor }} />
+        <h1 className="text-2xl font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-4xl">{site.name}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-snug text-zinc-600 [overflow-wrap:anywhere]">{site.description}</p>
       </header>
       <Terminal
         welcome={site.terminal.welcome}
@@ -60,7 +60,7 @@ export function App({ load = loadApplication, initialLocale = 'es' }: {
     if (state.status !== 'ready') document.documentElement.lang = initialLocale
   }, [initialLocale, state.status])
   return (
-    <main className="min-h-screen bg-white px-5 py-12 text-zinc-900 sm:px-12 sm:py-20">
+    <main className="flex h-dvh flex-col overflow-y-auto bg-white px-4 py-5 text-zinc-900 sm:px-8 sm:py-8">
       {state.status === 'loading' && <p role="status" className="mx-auto max-w-3xl text-sm text-zinc-500">{text.loading}</p>}
       {state.status === 'error' && (
         <div role="alert" className="mx-auto max-w-3xl">
