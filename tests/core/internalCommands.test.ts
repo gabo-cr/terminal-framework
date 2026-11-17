@@ -52,6 +52,7 @@ describe.each(['es', 'en'] as const)('comandos internos en %s', (locale) => {
   it.each(['unknown', 'ABOUT', ''])('devuelve un error estructurado para %j', (argument) => {
     expect(helpCommand(context, argument)).toEqual({
       type: 'error', code: 'COMMAND_NOT_FOUND', command: argument,
+      ...(argument === 'ABOUT' ? { suggestions: ['about'] } : {}),
       message: locale === 'es' ? `No existe el comando: ${argument}.` : `Command not found: ${argument}.`,
     })
   })

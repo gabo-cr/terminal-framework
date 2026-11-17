@@ -92,3 +92,7 @@ Los informes de incrementos anteriores no son necesarios para trabajar en nuevas
 ## Límites conocidos de 0.1.0
 
 Quedan pendientes pruebas con lectores de pantalla y dispositivos móviles físicos, una demostración visual y una traducción inglesa. La disponibilidad y CORS de contenidos reales se verifican al publicar. Los esquemas admiten nombres que empiezan por guion, aunque el parser los rechaza; evitar esos nombres, tal como explica commands.md. Resolver ese matiz antes de prometer contratos estables de una versión 1.0.
+
+## Alcance autorizado del Incremento 7
+
+El Core incorpora CompletionEngine y suggestCommands, sin React, HTTP ni nuevas dependencias. Reutiliza CommandRegistry y las consultas síncronas de ContentCatalog a través del servicio existente. createCommandRuntime compone completion una vez por sesión. COMMAND_NOT_FOUND admite alternativas opcionales, sin cambiar su código ni mensaje ni otros errores. No se modifican los contratos JSON ni el parser. Las interfaces, orden y umbrales se documentan en [core.md](core.md). No se implementa aún la lista visual de sugerencias ni la interacción de autocompletado en el input.

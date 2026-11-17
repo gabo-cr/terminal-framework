@@ -1,3 +1,4 @@
+import { suggestCommands } from './suggestCommands'
 import type { CommandRegistry, RegisteredCommand } from './CommandRegistry'
 import type { ClearResult, CommandLocale, CommandNotFoundResult, HelpEntry, HelpResult, HistoryResult } from './commandResults'
 
@@ -56,13 +57,14 @@ export function helpCommand(
   }
   const command = registry.find(argument)
   if (!command) {
-    return commandNotFoundResult(argument, locale)
+    return commandNotFoundResult(argument, locale, registry)
   }
   return { type: 'help', scope: 'command', title: text.specific(command.name), commands: [helpEntry(command, locale)] }
 }
 
-export function commandNotFoundResult(command: string, locale: CommandLocale): CommandNotFoundResult {
-  return { type: 'error', code: 'COMMAND_NOT_FOUND', command, message: messages[locale].notFound(command) }
+export function commandNotFoundResult(command: string, locale: CommandLocale, registry?: CommandRegistry): CommandNotFoundResult {
+  const suggestions = registry ? suggestCommands(command, registry) : []
+  return { type: 'error', code: 'COMMAND_NOT_FOUND', command, message: messages[locale].notFound(command), ...(suggestions.length ? { suggestions } : {}) }
 }
 
 export function clearCommand(): ClearResult {

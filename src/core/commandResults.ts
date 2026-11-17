@@ -20,6 +20,7 @@ export interface HelpResult {
 export interface CommandNotFoundResult {
   type: 'error'
   code: 'COMMAND_NOT_FOUND'
+  suggestions?: readonly string[]
   command: string
   message: string
 }

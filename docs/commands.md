@@ -120,3 +120,7 @@ Los mensajes internos se presentan en el idioma del sitio. La causa de un fallo 
 ## Fuente del contrato
 
 [Esquema y tipos](../src/configuration/commands.schema.ts), [nombres y conflictos](../src/core/commandNames.ts), [parser](../src/core/parseCommand.ts), [integrados](../src/core/internalCommands.ts) y [ejecutor](../src/core/CommandExecutor.ts). Pruebas: [esquema](../tests/configuration/commands.schema.test.ts), [referencias](../tests/configuration/validateConfiguration.test.ts) y [ejecutor](../tests/core/CommandExecutor.test.ts).
+
+### Alternativas ante comandos desconocidos
+
+Desde el Incremento 7, el resultado estructurado COMMAND_NOT_FOUND puede incluir `suggestions`, con hasta tres nombres o alias registrados cercanos al token desconocido. También se aplica al destino desconocido de help. La comparación ignora mayúsculas, pero no cambia la resolución exacta al ejecutar. El código y el mensaje del error se conservan, y la interfaz actual todavía no muestra ni ejecuta estas alternativas. Véanse [las interfaces del motor](core.md#incremento-7-completado-y-alternativas-de-error).

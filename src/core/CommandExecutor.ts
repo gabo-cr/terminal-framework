@@ -55,7 +55,7 @@ export class CommandExecutor {
     if (parsed.status === 'error') return [this.error(parsed.code)]
     const { name, argument } = parsed.command
     const command = this.registry.find(name)
-    if (!command) return [commandNotFoundResult(name, this.locale)]
+    if (!command) return [commandNotFoundResult(name, this.locale, this.registry)]
 
     if (command.kind === 'internal') {
       if (command.name === 'help') return [helpCommand({ registry: this.registry, locale: this.locale }, argument)]

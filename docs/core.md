@@ -163,3 +163,25 @@ Markdown a HTML.
 proveedor HTTP y caché reales y respuestas Fetch simuladas: documentos, colecciones,
 alias, internos, mensajes es/en, errores recuperables, reintentos, aislamiento de
 sesiones y solicitudes simultáneas. La suite del Incremento 2 se conserva.
+
+## Incremento 7: completado y alternativas de error
+
+`CompletionEngine` es independiente de React. Recibe `CompletionEngineOptions` con el registro existente, un `catalog` que expone las consultas síncronas `getDocument` y `getCollection` y un idioma opcional (`es` predeterminado). Puede usar ContentCatalog directamente o las consultas del servicio compuesto; no se crea otro catálogo ni se carga Markdown.
+
+`complete(input): CompletionResult` asume que el cursor está al final del campo:
+
+- `{ type: 'empty' }`: entrada vacía, sintaxis fuera de alcance o ninguna coincidencia.
+- `{ type: 'candidate', candidate }`: una coincidencia.
+- `{ type: 'suggestions', suggestions }`: varias coincidencias.
+
+Cada `CompletionSuggestion` contiene `name`, `description` cuando existe, `kind` (`command`, `alias`, `document` o `list`) e `insertValue`, la entrada completa que un consumidor podría insertar sin ejecutarla. Los comandos internos reutilizan las descripciones localizadas de help. La búsqueda por prefijo no distingue mayúsculas, pero la ejecución conserva la resolución exacta existente.
+
+Se sugieren nombres y alias en orden del registro, colocando los alias inmediatamente después de su comando. `help ` ofrece esos mismos tokens. Los argumentos de colecciones ofrecen primero `list`, después los documentos en su orden configurado y finalmente la introducción si no estaba enumerada. Se eliminan duplicados por nombre sin distinguir mayúsculas. Se resuelven alias de colección y se conserva exactamente el token de comando y los separadores al construir insertValue. No hay argumentos para comandos document, clear o history.
+
+No se completan flags, comillas, entradas multilínea, múltiples argumentos ni un tercer token tras un argumento y un espacio. Los nombres que comienzan por guion se excluyen, dado que el parser no puede ejecutarlos. El parser y los contratos JSON no cambian.
+
+`suggestCommands(name, registry): string[]` devuelve hasta tres nombres o alias registrados con distancia de edición conservadora, incluyendo transposiciones adyacentes. Compara sin distinguir mayúsculas: tokens de menos de tres caracteres solo admiten distancia cero; entre tres y cinco, una edición; desde seis, dos. El límite se calcula sobre el token más corto. Se ordena por distancia y, en empate, por orden del registro y alias; no ejecuta alternativas.
+
+`COMMAND_NOT_FOUND`, incluido el destino de `help`, incorpora `suggestions?: readonly string[]` solo cuando hay alternativas. Conserva código, mensaje localizado y comando original. No cambian los demás errores. TerminalOutput sigue mostrando el mensaje existente; la presentación de sugerencias y el manejo de Tab quedan fuera de este incremento.
+
+`createCommandRuntime` devuelve `{ content, executor, completion }`, componiendo el motor de completado una vez por sesión con las consultas del catálogo existente. bootstrapApplication expone también completion. La versión del paquete permanece en 0.1.0 hasta una decisión explícita de publicación.
