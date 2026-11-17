@@ -135,7 +135,7 @@ Cada sitio añade sus propios comandos mediante `commands.json`. Un comando de d
 
 Los nombres y los identificadores distinguen mayúsculas y minúsculas. La sintaxis admite un comando y, como máximo, un argumento. No ejecuta instrucciones del sistema operativo.
 
-Usa **Enter** para enviar. El historial y la memoria de documentos pertenecen a la sesión; no se guardan entre recargas.
+Usa **Tab** al final de la entrada para completar comandos o recursos. Si aparecen varias opciones, elige con **↑ / ↓** y confirma con **Tab** o clic. **Escape** cierra la lista. **Enter** siempre envía el texto que hayas escrito, sin elegir automáticamente una sugerencia. Con la lista cerrada, **↑ / ↓** recorren el historial y conservan tu borrador. El historial y la memoria de documentos pertenecen a la sesión; no se guardan entre recargas.
 
 ## El framework y tus publicaciones
 

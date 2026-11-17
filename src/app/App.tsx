@@ -35,6 +35,8 @@ function SitePage({ application }: { application: Application }) {
         <p className="mt-2 max-w-2xl text-sm leading-snug text-zinc-600 [overflow-wrap:anywhere]">{site.description}</p>
       </header>
       <Terminal
+        completion={application.completion}
+        locale={site.locale}
         welcome={site.terminal.welcome}
         theme={site.theme}
         labels={messages[site.locale]}

@@ -29,7 +29,7 @@ it.each(['es', 'en'] as const)('integra React, arranque, motor y contenidos HTTP
     vi.stubEnv('VITE_CONTENT_BASE_URL', `http://127.0.0.1:${address.port}/`)
     vi.stubEnv('DEV', true)
     render(<StrictMode><App /></StrictMode>)
-    const input = await screen.findByRole('textbox', { name: locale === 'es' ? 'Comando' : 'Command' })
+    const input = await screen.findByRole('combobox', { name: locale === 'es' ? 'Comando' : 'Command' })
     expect(requests.slice().sort()).toEqual(['/config/site.json', '/config/commands.json', '/config/content.json'].sort())
     expect(document.documentElement.lang).toBe(locale)
     const region = screen.getByRole('region', { name: locale === 'es' ? 'Ejecuciones anteriores' : 'Previous executions' })
@@ -41,6 +41,16 @@ it.each(['es', 'en'] as const)('integra React, arranque, motor y contenidos HTTP
       await waitFor(() => expect(input.getAttribute('aria-busy')).toBe('false'))
       return region.querySelector('[data-terminal-entry]:last-child') as HTMLElement
     }
+
+    fireEvent.change(input, { target: { value: 'abo' } })
+    fireEvent.keyDown(input, { key: 'Tab' })
+    expect((input as HTMLInputElement).value).toBe('about')
+    expect(region.querySelector('[data-terminal-entry]')).toBeNull()
+    fireEvent.change(input, { target: { value: 'h' } })
+    fireEvent.keyDown(input, { key: 'Tab' })
+    expect(screen.getByRole('listbox', { name: locale === 'es' ? 'Sugerencias de comandos' : 'Command suggestions' })).toBeTruthy()
+    fireEvent.keyDown(input, { key: 'Escape' })
+    expect(screen.queryByRole('listbox')).toBeNull()
 
     expect((await execute('help')).textContent).toContain(locale === 'es' ? 'Comandos disponibles' : 'Available commands')
     const help = await execute('help code')
@@ -68,6 +78,8 @@ it.each(['es', 'en'] as const)('integra React, arranque, motor y contenidos HTTP
       const entry = await execute(command)
       expect(within(entry).getAllByRole('listitem').map((item) => item.textContent)).toEqual(items)
     }
+    const typo = await execute('hlep')
+    expect(within(typo).getByText(locale === 'es' ? /Quizá quisiste decir/ : /Did you mean/).textContent).toContain('help')
     expect(within(await execute('unknown')).getByRole('alert').textContent).toBe(locale === 'es'
       ? 'No existe el comando: unknown.' : 'Command not found: unknown.')
     for (const command of ['code nonexistent', 'code cuento-001']) {
@@ -108,7 +120,7 @@ it('ejecuta una segunda configuración independiente con React y contenidos HTTP
     vi.stubEnv('VITE_CONTENT_BASE_URL', `http://127.0.0.1:${address.port}/`)
     vi.stubEnv('DEV', true)
     render(<StrictMode><App /></StrictMode>)
-    const input = await screen.findByRole('textbox', { name: 'Comando' })
+    const input = await screen.findByRole('combobox', { name: 'Comando' })
     expect(screen.getByRole('heading', { name: 'Cuaderno de ejemplo' })).toBeTruthy()
     async function execute(command: string) {
       fireEvent.change(input, { target: { value: command } })

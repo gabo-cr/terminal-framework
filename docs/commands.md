@@ -123,4 +123,10 @@ Los mensajes internos se presentan en el idioma del sitio. La causa de un fallo 
 
 ### Alternativas ante comandos desconocidos
 
-Desde el Incremento 7, el resultado estructurado COMMAND_NOT_FOUND puede incluir `suggestions`, con hasta tres nombres o alias registrados cercanos al token desconocido. También se aplica al destino desconocido de help. La comparación ignora mayúsculas, pero no cambia la resolución exacta al ejecutar. El código y el mensaje del error se conservan, y la interfaz actual todavía no muestra ni ejecuta estas alternativas. Véanse [las interfaces del motor](core.md#incremento-7-completado-y-alternativas-de-error).
+Desde el Incremento 7, el resultado estructurado COMMAND_NOT_FOUND puede incluir `suggestions`, con hasta tres nombres o alias registrados cercanos al token desconocido. También se aplica al destino desconocido de help. La comparación ignora mayúsculas, pero no cambia la resolución exacta al ejecutar. El código y el mensaje del error se conservan, y la interfaz muestra hasta tres alternativas bajo el mensaje, con la etiqueta «Quizá quisiste decir» o «Did you mean». No las ejecuta automáticamente. Véanse [las interfaces del motor](core.md#incremento-7-completado-y-alternativas-de-error).
+
+### Completar con Tab
+
+Al final de la entrada, Tab completa una coincidencia única o abre una lista si hay varias. La primera opción queda seleccionada; ↑/↓ cambian la selección y Tab la inserta. Clic o toque también completan sin ejecutar. Escape cierra sin cambiar la entrada. Enter cierra y ejecuta exactamente el texto actual, sin insertar la opción seleccionada.
+
+La lista se recalcula al editar y se cierra si no hay coincidencias. No se abre para entrada vacía, durante composición IME o ejecución pendiente ni con el cursor en medio. Shift+Tab y Tab sin coincidencias permiten abandonar el campo. Con la lista cerrada, ↑/↓ conservan la navegación por historial y su borrador. El motor admite comandos, alias, argumentos de help y recursos del catálogo de cada colección; no consulta Markdown remoto.

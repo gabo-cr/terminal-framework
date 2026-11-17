@@ -123,3 +123,11 @@ La versión 0.1.0 conserva pendientes las comprobaciones con lectores de pantall
 El 16 de noviembre de 2026 se comprobaron la instalación con lockfile congelado, las comprobaciones de tipos de aplicación y Core, las **527 pruebas en 25 archivos** y la compilación de producción. La integración HTTP verifica tanto external-site (español e inglés) como ui-site, sin modificar la aplicación para cambiar de catálogo. Las pruebas de foco verifican que enlaces, bloques de código, historial y botones conservan el foco incluso al terminar un comando.
 
 Esta verificación local no implica publicación en Pages ni pruebas en dispositivos físicos. La discrepancia anterior de las expectativas de help quedó corregida en las pruebas: ahora verifican los usos separados y la descripción sin exigir el formato antiguo con barras verticales.
+
+## Integración React del autocompletado (Incremento 7)
+
+Reproduce con el servidor de fixtures y Vite descritos arriba: `abo` + Tab completa about; `h` + Tab abre help/history; flechas seleccionan y otro Tab inserta. `code r` + Tab completa el recurso react-hooks. `help ` + Tab abre nombres y alias con scroll interno. Clic en una opción completa y mantiene el foco. Enter con la lista abierta ejecuta la entrada literal. `hlep` muestra el error y su alternativa help. Comprueba también Escape, Shift+Tab, cursor en medio y vuelta al borrador con el historial.
+
+La revisión funcional se realizó en navegador integrado, con viewport móvil 375 × 812 además del tamaño normal: completado único, selección con flechas/Tab y clic, Enter literal, recursos, error con alternativas y borrador. Se comprobaron lista con scroll interno, foco retenido al completar y ausencia de mensajes de error o advertencia en la consola durante el recorrido. Los lectores de pantalla y teléfonos físicos siguen pendientes; la inspección del viewport no los sustituye.
+
+El componente existente es TerminalPrompt (no hay un TerminalInput separado). Mantiene localmente la lista y la selección; useTerminal sigue siendo el propietario de historiales y bloqueo de ejecución. App pasa la instancia completion creada por el arranque. Las pruebas incluyen componentes, integración del historial real y App con HTTP en ambos idiomas.

@@ -1,13 +1,20 @@
+import type { CommandLocale } from '../core/commandResults'
 import { MarkdownRenderer } from './MarkdownRenderer'
 import type { CommandResult } from '../core/commandResults'
 
-export function TerminalOutput({ result }: { result: CommandResult }) {
+export function TerminalOutput({ result, locale = 'es' }: { result: CommandResult; locale?: CommandLocale }) {
   if (result.type === 'clear') return null
   const style = 'whitespace-pre-wrap text-zinc-200 [overflow-wrap:anywhere]'
   switch (result.type) {
     case 'text': return <p className={style}>{result.text}</p>
     case 'markdown': return <MarkdownRenderer markdown={result.markdown} />
-    case 'error': return <p role="alert" className="whitespace-pre-wrap text-rose-200 [overflow-wrap:anywhere]">{result.message}</p>
+    case 'error': return <div>
+      <p role="alert" className="whitespace-pre-wrap text-rose-200 [overflow-wrap:anywhere]">{result.message}</p>
+      {result.code === 'COMMAND_NOT_FOUND' && !!result.suggestions?.length && <p className="mt-1 text-xs text-zinc-400 [overflow-wrap:anywhere]">
+        {locale === 'es' ? 'Quizá quisiste decir: ' : 'Did you mean: '}
+        {result.suggestions.slice(0, 3).map((name, index) => <span key={name}>{index > 0 ? ', ' : ''}<code className="text-[var(--terminal-help)]">{name}</code></span>)}
+      </p>}
+    </div>
     case 'history': return <ol className={style}>{result.entries.map((entry) => <li key={entry.number}>{entry.number}. {entry.input}</li>)}</ol>
     case 'list': return <div className={style}><p>{result.title}</p><ul>{result.items.map((item) => <li key={item.id}>{item.id} — {item.title}{item.description ? `: ${item.description}` : ''}</li>)}</ul></div>
     case 'help': return (

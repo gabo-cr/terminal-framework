@@ -1,3 +1,5 @@
+import type { CompletionEngine } from '../core/CompletionEngine'
+import type { CommandLocale } from '../core/commandResults'
 import { useId } from 'react'
 import type { CSSProperties } from 'react'
 import { TerminalHistory } from './TerminalHistory'
@@ -7,6 +9,8 @@ import { TerminalPrompt } from './TerminalPrompt'
 import type { TerminalEntryData, TerminalTheme } from './types'
 
 export interface TerminalProps {
+  completion?: Pick<CompletionEngine, 'complete'>
+  locale?: CommandLocale
   welcome: string
   theme: TerminalTheme
   entries?: readonly TerminalEntryData[]
@@ -19,7 +23,7 @@ export interface TerminalProps {
   labels: { history: string; input: string; pending?: string }
 }
 
-export function Terminal({ welcome, theme, entries = [], promptValue, labels, onInputChange, onSubmit, pending, onHistoryPrevious, onHistoryNext }: TerminalProps) {
+export function Terminal({ welcome, theme, entries = [], promptValue, labels, onInputChange, onSubmit, pending, onHistoryPrevious, onHistoryNext, completion, locale = 'es' }: TerminalProps) {
   const titleId = useId()
   const scroll = useTerminalScroll(entries, welcome)
   return (
@@ -36,10 +40,10 @@ export function Terminal({ welcome, theme, entries = [], promptValue, labels, on
         <div ref={scroll.viewport} onScroll={scroll.onScroll} role="region" aria-label={labels.history} tabIndex={0} className="terminal-scrollbar min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">
           <div ref={scroll.content} className="relative">
             <TerminalOutput result={{ type: 'text', text: welcome }} />
-            <TerminalHistory entries={entries} label={labels.history} pendingLabel={labels.pending ?? '…'} />
+            <TerminalHistory locale={locale} entries={entries} label={labels.history} pendingLabel={labels.pending ?? '…'} />
           </div>
         </div>
-        <TerminalPrompt onHistoryPrevious={onHistoryPrevious} onHistoryNext={onHistoryNext} label={labels.input} value={promptValue} onChange={onInputChange} onSubmit={onSubmit} pending={pending} />
+        <TerminalPrompt completion={completion} locale={locale} onHistoryPrevious={onHistoryPrevious} onHistoryNext={onHistoryNext} label={labels.input} value={promptValue} onChange={onInputChange} onSubmit={onSubmit} pending={pending} />
       </div>
     </section>
   )
