@@ -13,7 +13,8 @@ Cada persona define su nombre, presentación, colores, comandos y publicaciones 
 ## Qué puedes hacer hoy
 
 - Explorar documentos y colecciones mediante comandos, con nombres alternativos opcionales.
-- Consultar ayuda general o específica con el comando `help` y recuperar comandos anteriores con el comando `history`.
+- Consultar ayuda con `help`, ver comandos anteriores con `history` y recuperar instrucciones con ↑/↓.
+- Completar comandos, alias y recursos con Tab, elegir coincidencias por teclado o clic y recibir alternativas ante errores tipográficos.
 - Leer textos Markdown con títulos, listas, enlaces y bloques de código dentro de la terminal.
 - Limpiar las respuestas sin perder la bienvenida ni el historial de comandos de la sesión.
 - Personalizar la presentación y elegir español o inglés para los mensajes del sistema. Los textos publicados conservan el idioma en que se escribieron.
@@ -110,7 +111,7 @@ JSON es un formato de texto que permite describir datos de manera estructurada. 
 
 Los tres requieren `version: 1`. Una colección reúne una introducción y una lista ordenada de documentos. Los textos se escriben en archivos Markdown independientes y se conectan al catálogo por sus identificadores.
 
-Puedes revisar [los JSON del sitio de prueba](tests/fixtures/external-site/config) para ver ejemplos completos y [los contratos de configuración](docs/project.md#contratos-de-configuración) para conocer los campos y reglas exactos.
+Puedes revisar [los JSON del sitio de prueba](tests/fixtures/external-site/config) para ver ejemplos completos y [los contratos de configuración](docs/configuration.md) para conocer los campos y reglas exactos.
 
 ## Comandos de la terminal
 
@@ -135,7 +136,7 @@ Cada sitio añade sus propios comandos mediante `commands.json`. Un comando de d
 
 Los nombres y los identificadores distinguen mayúsculas y minúsculas. La sintaxis admite un comando y, como máximo, un argumento. No ejecuta instrucciones del sistema operativo.
 
-Usa **Tab** al final de la entrada para completar comandos o recursos. Si aparecen varias opciones, elige con **↑ / ↓** y confirma con **Tab** o clic. **Escape** cierra la lista. **Enter** siempre envía el texto que hayas escrito, sin elegir automáticamente una sugerencia. Con la lista cerrada, **↑ / ↓** recorren el historial y conservan tu borrador. El historial y la memoria de documentos pertenecen a la sesión; no se guardan entre recargas.
+Usa **Tab** al final de la entrada para completar comandos o recursos. Si aparecen varias opciones, elige con **↑ / ↓** y confirma con **Tab** o clic. **Escape** cierra la lista. **Enter** siempre envía el texto que hayas escrito, sin elegir automáticamente una sugerencia. Si la única opción ya coincide con la entrada, Tab permite salir del campo. Con la lista cerrada, **↑ / ↓** recorren el historial y conservan tu borrador. El historial y la memoria de documentos pertenecen a la sesión; no se guardan entre recargas.
 
 ## El framework y tus publicaciones
 
@@ -178,11 +179,9 @@ El repositorio incluye un workflow manual para GitHub Pages. Preparar el build o
 ## Documentación detallada
 
 - [Instalación y desarrollo local](docs/development.md).
-
 - [Configuración del sitio: site.json](docs/configuration.md).
 - [Comandos: commands.json](docs/commands.md).
 - [Catálogo de contenidos: content.json](docs/content.md).
-
 - [Visión, arquitectura y configuración](docs/project.md).
 - [Motor de comandos y contrato de integración](docs/core.md).
 - [Publicación en GitHub Pages y dominio personalizado](docs/deployment.md).
@@ -192,14 +191,14 @@ El repositorio incluye un workflow manual para GitHub Pages. Preparar el build o
 
 Este es un proyecto de mantenimiento personal: **no se aceptan ni se revisan contribuciones externas o pull requests**. Puedes descargar, clonar o hacer un fork del código para adaptarlo y mantener tu propia versión, sin obligación de aportar tus cambios al repositorio original.
 
-Consulta [la política de uso y contribuciones](contributing.md). El framework se distribuye bajo la [licencia MIT](LICENSE), con copyright de Gabriel Chávez Riera (2026). La licencia de los contenidos personales es independiente.
+Consulta [la política de uso y contribuciones](CONTRIBUTING.md). El framework se distribuye bajo la [licencia MIT](LICENSE), con copyright de Gabriel Chávez Riera (2026). La licencia de los contenidos personales es independiente.
 
-## Estado y próximos pasos
+## Estado y limitaciones
 
-El proyecto está en desarrollo, con versión `0.1.0` en `package.json`. La terminal interactiva, el motor de comandos y la lectura de contenidos externos ya están implementados. Esta primera versión pública del MVP incluye la documentación de configuración, desarrollo y despliegue. No se presenta como una versión 1.0 estable.
+El código incluye el autocompletado y las sugerencias en la versión v0.2.0, actualizada en `package.json`. Consulta [CHANGELOG.md](CHANGELOG.md) para el registro de versiones.
 
 Quedan por completar la demostración visual y una versión en inglés de este README. También están pendientes las comprobaciones con lectores de pantalla y dispositivos móviles físicos señaladas en la documentación, y la verificación remota del despliegue con los contenidos reales.
 
-Las futuras funcionalidades deberán acordarse antes de incorporarlas. Flags, búsqueda, categorías y plugins no forman parte de las capacidades actuales ni se anuncian aquí como compromisos de desarrollo.
+Flags, búsqueda, categorías y plugins no forman parte de las capacidades actuales.
 
 Este README se mantiene por ahora en español, con secciones independientes para facilitar una futura versión equivalente en inglés.

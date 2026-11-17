@@ -98,6 +98,22 @@ describe('autocompletado del prompt', () => {
     expect(key('Tab')).toBe(true)
     expect(screen.queryByRole('listbox')).toBeNull()
   })
+  it.each(['help', 'home', 'notes list', 'notes first'])('permite Tab si la única coincidencia ya está completa: %s', (initial) => {
+    render(<Harness initial={initial} />)
+    expect(key('Tab')).toBe(true)
+    expect(field().value).toBe(initial)
+    expect(screen.queryByRole('listbox')).toBeNull()
+  })
+  it.each([false, true])('respeta Shift+flechas con lista abierta=%s', (open) => {
+    const previous = vi.fn(), next = vi.fn()
+    render(<Harness initial="h" previous={previous} next={next} />)
+    if (open) key('Tab')
+    expect(key('ArrowUp', { shiftKey: true })).toBe(true)
+    expect(key('ArrowDown', { shiftKey: true })).toBe(true)
+    expect(previous).not.toHaveBeenCalled()
+    expect(next).not.toHaveBeenCalled()
+    if (open) expect(screen.getAllByRole('option')[0]!.getAttribute('aria-selected')).toBe('true')
+  })
   it('recalcula al editar, incluso una sola coincidencia, y cierra cuando no hay', () => {
     render(<Harness initial="h" />)
     key('Tab'); edit('ho')

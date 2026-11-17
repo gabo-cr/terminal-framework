@@ -10,7 +10,7 @@ solo en una copia temporal de las fixtures.
 
 `code react-hooks` incluye un documento largo, una línea de código ancha, texto
 sin espacios y enlaces seguros/bloqueados para revisar diseño adaptable, teclado
-y desplazamiento. Se reutiliza en las pruebas HTTP y en la revisión manual del
+y desplazamiento. Se reutiliza en las pruebas HTTP y en la revisión manual de la
 [guía de desarrollo](../../../docs/development.md); no es contenido de producción.
 
 Consulta [la guía de desarrollo](../../../docs/development.md) para reproducir la

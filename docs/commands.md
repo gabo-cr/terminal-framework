@@ -37,7 +37,7 @@ Las referencias siguen el formato de [IDs del catálogo](content.md#identificado
 
 ### Alias y nombres reservados
 
-`help`, `clear` e `history` están reservados, tanto como nombres como alias. Todos los nombres y alias deben ser únicos en el conjunto de comandos: se rechazan alias repetidos, alias iguales al propio nombre y colisiones entre comandos. Un alias conduce al mismo comportamiento; las sugerencias usan el nombre canónico.
+`help`, `clear` e `history` están reservados, tanto como nombres como alias. Todos los nombres y alias deben ser únicos en el conjunto de comandos: se rechazan alias repetidos, alias iguales al propio nombre y colisiones entre comandos. Un alias conduce al mismo comportamiento; la ayuda específica y la sugerencia de ejecutar list usan el nombre canónico. El autocompletado y las alternativas ante errores pueden ofrecer también alias.
 
 Los nombres admiten letras ASCII minúsculas, números y guiones, sin espacios ni guiones bajos. Su patrón es más permisivo que el de los IDs: el esquema admite guiones iniciales o repetidos. Sin embargo, el parser rechaza cualquier token que empiece por `-`; evita nombres y alias con ese comienzo para que puedan invocarse.
 
@@ -123,10 +123,10 @@ Los mensajes internos se presentan en el idioma del sitio. La causa de un fallo 
 
 ### Alternativas ante comandos desconocidos
 
-Desde el Incremento 7, el resultado estructurado COMMAND_NOT_FOUND puede incluir `suggestions`, con hasta tres nombres o alias registrados cercanos al token desconocido. También se aplica al destino desconocido de help. La comparación ignora mayúsculas, pero no cambia la resolución exacta al ejecutar. El código y el mensaje del error se conservan, y la interfaz muestra hasta tres alternativas bajo el mensaje, con la etiqueta «Quizá quisiste decir» o «Did you mean». No las ejecuta automáticamente. Véanse [las interfaces del motor](core.md#incremento-7-completado-y-alternativas-de-error).
+El resultado estructurado COMMAND_NOT_FOUND puede incluir `suggestions`, con hasta tres nombres o alias registrados cercanos al token desconocido. También se aplica al destino desconocido de help. La comparación ignora mayúsculas, pero no cambia la resolución exacta al ejecutar. El código y el mensaje del error se conservan, y la interfaz muestra hasta tres alternativas bajo el mensaje, con la etiqueta «Quizá quisiste decir» o «Did you mean». No las ejecuta automáticamente. Véanse [las interfaces del motor](core.md#completado-y-alternativas-de-error).
 
 ### Completar con Tab
 
 Al final de la entrada, Tab completa una coincidencia única o abre una lista si hay varias. La primera opción queda seleccionada; ↑/↓ cambian la selección y Tab la inserta. Clic o toque también completan sin ejecutar. Escape cierra sin cambiar la entrada. Enter cierra y ejecuta exactamente el texto actual, sin insertar la opción seleccionada.
 
-La lista se recalcula al editar y se cierra si no hay coincidencias. No se abre para entrada vacía, durante composición IME o ejecución pendiente ni con el cursor en medio. Shift+Tab y Tab sin coincidencias permiten abandonar el campo. Con la lista cerrada, ↑/↓ conservan la navegación por historial y su borrador. El motor admite comandos, alias, argumentos de help y recursos del catálogo de cada colección; no consulta Markdown remoto.
+La lista se recalcula al editar y se cierra si no hay coincidencias. No se abre para entrada vacía, durante composición IME o ejecución pendiente ni con el cursor en medio. Shift+Tab y Tab sin coincidencias o con una única opción ya idéntica a la entrada permiten abandonar el campo. Las flechas con modificadores conservan la selección y navegación nativas. Con la lista cerrada, ↑/↓ conservan la navegación por historial y su borrador. El motor admite comandos, alias, argumentos de help y recursos del catálogo de cada colección; no consulta Markdown remoto.

@@ -69,6 +69,8 @@ pnpm exec vitest run tests/configuration
 pnpm run test:contents:http
 ```
 
+No hay scripts de lint o formato declarados en package.json. No se requiere instalar herramientas adicionales para estas comprobaciones.
+
 Las pruebas HTTP abren servidores locales temporales: no requieren el servidor manual y necesitan permiso del entorno para escuchar en puertos locales.
 
 ## Generar y revisar el sitio
@@ -93,7 +95,7 @@ Para comprobar la base raíz, cambia `VITE_BASE_PATH=/` en `.env.local` y vuelve
 | `listen EPERM` en pruebas | El entorno bloquea servidores locales; ejecuta las pruebas HTTP donde se permitan puertos locales |
 | Funciona en dev, falla en preview | Sustituye HTTP local por una raíz HTTPS válida y vuelve a generar |
 
-## Reproducir la verificación integrada del MVP
+## Revisión funcional
 
 Con Vite y el servidor de fixtures activos, prueba en `/terminal-framework/`:
 
@@ -101,7 +103,7 @@ Con Vite y el servidor de fixtures activos, prueba en `/terminal-framework/`:
 2. `about`, `code`, `code list`, `code react-hooks`, `read list` y `read cuento-001`: Markdown, introducciones y listados completos en el orden configurado.
 3. `unknown`, `code nonexistent`, `about extra` y `missing`: errores recuperables, sin perder la sesión. El archivo de missing no existe a propósito.
 4. `clear` y `history`: la salida se limpia sin borrar bienvenida, comandos ni caché. Usa ↑/↓ para recuperar instrucciones y volver al borrador.
-5. Tab/Shift+Tab: salir del input, enfocar enlaces, bloques de código y región de historial, y volver sin que la terminal robe el foco. El campo tiene foco inicial y lo conserva al ejecutar si no te trasladas a otro elemento.
+5. Shift+Tab, o Tab sin coincidencias pendientes: salir del input, enfocar enlaces, bloques de código y región de historial, y volver sin que la terminal robe el foco. El campo tiene foco inicial y lo conserva al ejecutar si no te trasladas a otro elemento.
 6. Leer un documento largo, desplazarse a una respuesta anterior y redimensionar: conservar la posición de lectura. Revisar tamaños de escritorio y móvil sin desbordamiento global.
 
 `tests/app/App.http.test.tsx` reproduce el recorrido con React, bootstrap, motor y HTTP real en español e inglés. `tests/app/contents.http.test.ts` comprueba además descarga, caché y recuperación tras publicar el archivo ausente en una copia temporal. `tests/terminal/accessibility.test.tsx` verifica la conservación de foco en otros controles y decisiones de scroll con geometría simulada; jsdom no sustituye pruebas de teclado en un navegador.
@@ -116,18 +118,10 @@ pnpm exec node --experimental-strip-types --input-type=module -e "import('./test
 
 Este comando usa la eliminación de tipos de Node. Cambia temporalmente `VITE_CONTENT_BASE_URL` de `.env.local` a `http://127.0.0.1:4175/` y reinicia Vite. Prueba `about`, `essays`, `essays list` y `essays first-essay`. Restablece la raíz anterior al terminar. Los dos sitios reutilizan la misma aplicación sin cambiar código de producción.
 
-La versión 0.1.0 conserva pendientes las comprobaciones con lectores de pantalla, teléfonos físicos y Pages real. Estas verificaciones no se afirman como completadas por ejecutar pruebas locales.
+## Revisar autocompletado y errores
 
-## Verificación de 0.1.0
+Con las fixtures activas: `abo` + Tab completa about; `h` + Tab abre help/history. Flechas sin modificadores seleccionan y otro Tab inserta. `code r` completa react-hooks y `help ` abre nombres y alias con scroll interno. Clic o toque completa sin ejecutar. Escape cierra; Enter con lista abierta ejecuta el texto literal. `hlep` muestra el error y la alternativa help.
 
-El 16 de noviembre de 2026 se comprobaron la instalación con lockfile congelado, las comprobaciones de tipos de aplicación y Core, las **527 pruebas en 25 archivos** y la compilación de producción. La integración HTTP verifica tanto external-site (español e inglés) como ui-site, sin modificar la aplicación para cambiar de catálogo. Las pruebas de foco verifican que enlaces, bloques de código, historial y botones conservan el foco incluso al terminar un comando.
+Comprueba también edición con la lista abierta, cursor en medio, IME, Tab con una opción ya completa, Shift+Tab, selección de texto con Shift+flechas, salida a enlaces y vuelta al borrador con el historial. Durante ejecuciones pendientes no se completa ni se reabre una lista anterior.
 
-Esta verificación local no implica publicación en Pages ni pruebas en dispositivos físicos. La discrepancia anterior de las expectativas de help quedó corregida en las pruebas: ahora verifican los usos separados y la descripción sin exigir el formato antiguo con barras verticales.
-
-## Integración React del autocompletado (Incremento 7)
-
-Reproduce con el servidor de fixtures y Vite descritos arriba: `abo` + Tab completa about; `h` + Tab abre help/history; flechas seleccionan y otro Tab inserta. `code r` + Tab completa el recurso react-hooks. `help ` + Tab abre nombres y alias con scroll interno. Clic en una opción completa y mantiene el foco. Enter con la lista abierta ejecuta la entrada literal. `hlep` muestra el error y su alternativa help. Comprueba también Escape, Shift+Tab, cursor en medio y vuelta al borrador con el historial.
-
-La revisión funcional se realizó en navegador integrado, con viewport móvil 375 × 812 además del tamaño normal: completado único, selección con flechas/Tab y clic, Enter literal, recursos, error con alternativas y borrador. Se comprobaron lista con scroll interno, foco retenido al completar y ausencia de mensajes de error o advertencia en la consola durante el recorrido. Los lectores de pantalla y teléfonos físicos siguen pendientes; la inspección del viewport no los sustituye.
-
-El componente existente es TerminalPrompt (no hay un TerminalInput separado). Mantiene localmente la lista y la selección; useTerminal sigue siendo el propietario de historiales y bloqueo de ejecución. App pasa la instancia completion creada por el arranque. Las pruebas incluyen componentes, integración del historial real y App con HTTP en ambos idiomas.
+TerminalPrompt mantiene la lista y selección; useTerminal conserva historiales y bloqueo. Las pruebas cubren ambos componentes y la integración de App con HTTP en es/en. La revisión de un viewport móvil no sustituye un dispositivo físico ni un lector de pantalla. Estas comprobaciones y la publicación real de Pages siguen pendientes en sus respectivos entornos.

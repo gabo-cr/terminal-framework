@@ -16,7 +16,7 @@ export function TerminalPrompt({ label, value = '', onChange, onSubmit, pending 
   useEffect(() => { input.current?.focus({ preventScroll: true }) }, [])
   useEffect(() => { if (pending) setMenu(null) }, [pending])
   useEffect(() => {
-    // Scroll uniquement dans la liste; ne pas déplacer la page ou les réponses.
+    // Desplazar solo la lista, sin mover la página ni las respuestas.
     const option = selectedOption.current
     const list = option?.parentElement
     if (!option || !list) return
@@ -80,13 +80,13 @@ export function TerminalPrompt({ label, value = '', onChange, onSubmit, pending 
               if (pending || !onChange || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey || !atEnd()) { setMenu(null); return }
               if (visible) { event.preventDefault(); apply(visible.items[visible.selected]!); return }
               const items = matches(value)
-              if (!items.length) return
+              if (!items.length || (items.length === 1 && items[0]!.insertValue === value)) return
               event.preventDefault()
               if (items.length === 1) apply(items[0]!)
               else setMenu({ value, items, selected: 0 })
               return
             }
-            if (!pending && !event.altKey && !event.ctrlKey && !event.metaKey) {
+            if (!pending && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey) {
               if (visible && atEnd() && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
                 event.preventDefault()
                 setMenu({ ...visible, selected: (visible.selected + (event.key === 'ArrowDown' ? 1 : -1) + visible.items.length) % visible.items.length })
